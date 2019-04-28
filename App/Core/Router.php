@@ -27,16 +27,6 @@ class Router
     private $uriParams = [];
 
     /**
-     * @var array
-     */
-    private $registeredControllers = [];
-
-    /**
-     * @var array
-     */
-    private $registeredActions = [];
-
-    /**
      * Router constructor.
      */
     public function __construct()
@@ -149,42 +139,6 @@ class Router
     public function setUriParams($uriParams)
     {
         $this->uriParams = $uriParams;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRegisteredControllers()
-    {
-        return $this->registeredControllers;
-    }
-
-    /**
-     * @param array $registeredControllers
-     * @return Router
-     */
-    public function registerController($registeredControllers)
-    {
-        $this->registeredControllers[] = $registeredControllers;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getRegisteredActions()
-    {
-        return $this->registeredActions;
-    }
-
-    /**
-     * @param array $registeredActions
-     * @return Router
-     */
-    public function setRegisteredActions($registeredActions)
-    {
-        $this->registeredActions = $registeredActions;
         return $this;
     }
 
