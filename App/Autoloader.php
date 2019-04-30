@@ -101,3 +101,16 @@ function logger()
     return $log;
 }
 logger();
+
+/**
+ * @return \App\Core\Utilities
+ */
+function utilities()
+{
+    static $utilities;
+    if(!$utilities instanceOf \App\Core\Utilities)
+    {
+        $utilities = new \App\Core\Utilities();
+    }
+    return $utilities;
+}

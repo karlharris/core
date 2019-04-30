@@ -24,12 +24,45 @@ class Logging
         'mail'
     ];
 
+    /**
+     * @var array
+     */
     private $defaultOptions = [
         'type' => 'error',
         'backtrace' => true,
         'mode' => '',
-        'email' => ''
+        'email' => '',
+        'file' => ''
     ];
+
+    /**
+     * @var string
+     */
+    private $file = '';
+
+    /**
+     * Logging constructor.
+     */
+    public function __construct()
+    {
+        $filePath = 'var'.DS.'log'.DS;
+        $this->file = BP.$filePath.'error_'.date('Ymd').'.log';
+        if(!file_exists($this->file))
+        {
+            utilities()->rmkdir($filePath);
+        }
+    }
+
+    /**
+     * @param string $mode
+     */
+    public function setMode($mode)
+    {
+        if(array_key_exists($mode, array_flip($this->modes)))
+        {
+            $this->mode = $mode;
+        }
+    }
 
     /**
      * Logging
@@ -55,19 +88,8 @@ class Logging
                 break;
             case 'file':
             default:
-                file_put_contents(BP.'var'.DS.'log'.DS.'error_'.date('Ymd').'.log', $output, FILE_APPEND);
+                file_put_contents(($options['file'] === '' ? $this->file : $options['file']), $output, FILE_APPEND);
                 break;
-        }
-    }
-
-    /**
-     * @param string $mode
-     */
-    public function setMode($mode)
-    {
-        if(array_key_exists($mode, array_flip($this->modes)))
-        {
-            $this->mode = $mode;
         }
     }
 }

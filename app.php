@@ -9,11 +9,3 @@ if(!require_once('App/Autoloader.php'))
 }
 
 router();
-echo '<pre>';
-print_r(router()->getUriParams());
-echo '</pre>';
-/*echo '<pre>';
-print_r(router()->getPathParams());
-print_r(router()->getRequestParams());
-print_r(config());
-echo '</pre>';*/
