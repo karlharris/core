@@ -52,7 +52,15 @@ class Router
             {
                 $this->redirect('install');
             } else {
-                $this->uriParams['controllerClass'] = str_replace('\App\Controller', '\InstallAssets\Controller', $controllerClass);
+                $this->uriParams['controllerClass'] = str_replace(
+                    '\App',
+                    '\InstallAssets',
+                    $controllerClass
+                );
+                if(!require_once('InstallAssets/Autoloader.php'))
+                {
+                    die('/InstallAssets/Autoloader.php not found.');
+                }
             }
         }
         if(!empty($path) && !$this->isValidPath($path))
@@ -100,23 +108,11 @@ class Router
     }
 
     /**
-     * @param mixed $uriParam
-     * @return Router
+     * @return mixed
      */
-    public function addUriParam($uriParam)
+    public function getControllerClass()
     {
-        $this->uriParams[] = $uriParam;
-        return $this;
-    }
-
-    /**
-     * @param array $uriParams
-     * @return Router
-     */
-    public function setUriParams($uriParams)
-    {
-        $this->uriParams = $uriParams;
-        return $this;
+        return $this->uriParams['controllerClass'];
     }
 
     /**

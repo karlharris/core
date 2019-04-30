@@ -25,9 +25,9 @@ defined('BU') ?: define('BU', (isSecure ? 'https://' : 'http://').(isset($_SERVE
 defined('TP') ?: define('TP', BP.'theme'.DS);
 
 spl_autoload_register(
-/**
- * @param string $class
- */
+    /**
+     * @param string $class
+     */
     function($class)
     {
         $prefix = 'App\\';
@@ -91,7 +91,7 @@ function router()
 /**
  * @return \App\Core\Logging
  */
-function log()
+function logger()
 {
     static $log;
     if(!$log instanceOf \App\Core\Logging)
