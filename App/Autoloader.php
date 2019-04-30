@@ -47,6 +47,35 @@ spl_autoload_register(
 );
 
 /**
+ * @return array
+ */
+function config()
+{
+    static $config;
+    if(empty($config))
+    {
+        try
+        {
+            $config = array_merge(require(BP.'App/default_config.php'), require(BP.'config.php'));
+        } catch(\Exception $e) {
+            die('config() -> '.$e->getMessage());
+        }
+        if(isset($config['db']))
+        {
+            unset($config['db']);
+        }
+        if($config['show_errors'])
+        {
+            error_reporting(E_ALL);
+            ini_set('display_errors', 1);
+        }
+        date_default_timezone_set($config['timezone']);
+    }
+    return $config;
+}
+config();
+
+/**
  * @return \App\Core\Router
  */
 function router()
@@ -57,4 +86,17 @@ function router()
         $router = new \App\Core\Router();
     }
     return $router;
+}
+
+/**
+ * @return \App\Core\Logging
+ */
+function log()
+{
+    static $log;
+    if(!$log instanceOf \App\Core\Logging)
+    {
+        $log = new \App\Core\Logging();
+    }
+    return $log;
 }

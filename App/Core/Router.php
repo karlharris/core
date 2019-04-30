@@ -12,16 +12,6 @@ namespace App\Core;
 class Router
 {
     /**
-     * @var string
-     */
-    private $controller = 'index';
-
-    /**
-     * @var string
-     */
-    private $action = 'index';
-
-    /**
      * @var array
      */
     private $uriParams = [];
@@ -39,49 +29,36 @@ class Router
             {
                 array_pop($path);
             }
-            $path['path'] = $_REQUEST['path'];
             unset($_REQUEST['path']);
+        }
+        $controllerClass = '\App\Controller';
+        if(!empty($path))
+        {
+            foreach($path as $part)
+            {
+                $controllerClass .= '\\'.$part;
+            }
+        } else {
+            $controllerClass .= '\Index';
         }
         $this->uriParams = [
             'path' => $path,
-            'request' => $_REQUEST
+            'request' => $_REQUEST,
+            'controllerClass' => $controllerClass
         ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getController()
-    {
-        return $this->controller;
-    }
-
-    /**
-     * @param string $controller
-     * @return Router
-     */
-    public function setController($controller)
-    {
-        $this->controller = strtolower($controller);
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAction()
-    {
-        return $this->action;
-    }
-
-    /**
-     * @param string $action
-     * @return Router
-     */
-    public function setAction($action)
-    {
-        $this->action = strtolower($action);
-        return $this;
+        if(is_dir(BP.'InstallAssets'))
+        {
+            if(!$this->isPath('install/*'))
+            {
+                $this->redirect('install');
+            } else {
+                $this->uriParams['controllerClass'] = str_replace('\App\Controller', '\InstallAssets\Controller', $controllerClass);
+            }
+        }
+        if(!empty($path) && !$this->isValidPath($path))
+        {
+            $this->redirect('404', '404');
+        }
     }
 
     /**
@@ -144,7 +121,7 @@ class Router
 
     /**
      * @param array $params
-     * @param bool $httpStatus
+     * @param bool|string $httpStatus
      */
     public function redirect($params = [], $httpStatus = false)
     {
@@ -172,5 +149,65 @@ class Router
         }
         header("Location: ".$path);
         exit;
+    }
+
+    /**
+     * @param $paths
+     * @return bool
+     */
+    private function isValidPath($paths)
+    {
+        $array = config()['registeredControllers'];
+        $lastLevel = array_pop($paths);
+        if(empty($paths))
+        {
+            return array_key_exists($lastLevel, $array) || in_array($lastLevel, $array);
+        }
+        foreach($paths as $path)
+        {
+            if(!is_array($array))
+            {
+                return false;
+            } elseif(array_key_exists($path, $array))
+            {
+                $array = $array[$path];
+                if(is_array($array))
+                {
+                    if(array_key_exists('0', $array))
+                    {
+                        $array = array_flip($array);
+                    }
+                }
+            } else {
+                return false;
+            }
+        }
+        return array_key_exists($lastLevel, $array);
+    }
+
+    /**
+     * @param $pattern
+     * @return bool
+     */
+    public function isPath($pattern)
+    {
+        $flippedPath = array_flip($this->getPathParams());
+        if(strpos($pattern, '/') !== false)
+        {
+            $pathArray = explode('/', $pattern);
+            foreach($pathArray as $key => $path)
+            {
+                if($path === '*')
+                {
+                    return true;
+                } elseif(!array_key_exists($path, $flippedPath))
+                {
+                    return false;
+                }
+            }
+        } else {
+            return array_key_exists($pattern, $flippedPath);
+        }
+        return true;
     }
 }
