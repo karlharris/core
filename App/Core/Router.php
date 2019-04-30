@@ -167,18 +167,11 @@ class Router
             } elseif(array_key_exists($path, $array))
             {
                 $array = $array[$path];
-                if(is_array($array))
-                {
-                    if(array_key_exists('0', $array))
-                    {
-                        $array = array_flip($array);
-                    }
-                }
             } else {
                 return false;
             }
         }
-        return array_key_exists($lastLevel, $array);
+        return array_key_exists($lastLevel, $array) || in_array($lastLevel, $array);
     }
 
     /**

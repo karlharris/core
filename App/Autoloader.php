@@ -100,3 +100,4 @@ function logger()
     }
     return $log;
 }
+logger();
