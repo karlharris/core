@@ -84,8 +84,12 @@ class Logging
         switch($mode)
         {
             case 'mail':
-                mail(($options['email'] === '' ? config()['loggerEmail'] : $options['email']), 'error logging '.BU, $output);
-                break;
+                $mail = ($options['email'] === '' ? config()['loggerEmail'] : $options['email']);
+                if($mail !== '')
+                {
+                    mail($mail, 'error logging '.BU, $output);
+                    break;
+                }
             case 'file':
             default:
                 file_put_contents(($options['file'] === '' ? $this->file : $options['file']), $output, FILE_APPEND);

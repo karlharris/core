@@ -23,6 +23,10 @@ defined('BU') ?: define('BU', (isSecure ? 'https://' : 'http://').(isset($_SERVE
  * theme path
  */
 defined('TP') ?: define('TP', BP.'theme'.DS);
+/**
+ * default theme resource path
+ */
+defined('DTP') ?: define('DTP', BP.'theme'.DS.'default'.DS.'resources'.DS);
 
 spl_autoload_register(
     /**
@@ -113,7 +117,21 @@ function router()
     return $router;
 }
 
+/**
+ * @return \App\Core\Theme
+ */
+function theme()
+{
+    static $theme;
+    if(!$theme instanceOf \App\Core\Theme)
+    {
+        $theme = new \App\Core\Theme();
+    }
+    return $theme;
+}
+
 utilities();
 logger();
 config();
 router();
+theme();

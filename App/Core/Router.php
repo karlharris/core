@@ -17,55 +17,30 @@ class Router
     private $uriParams = [];
 
     /**
+     * @var mixed
+     */
+    private $controller = null;
+
+    /**
+     * @var array
+     */
+    private $registeredControllers = [];
+
+    /**
      * Router constructor.
      */
     public function __construct()
     {
-        $path = [];
-        if(isset($_REQUEST['path']))
-        {
-            $path = explode('/', $_REQUEST['path']);
-            if(empty(end($path)))
-            {
-                array_pop($path);
-            }
-            unset($_REQUEST['path']);
-        }
-        $controllerClass = '\App\Controller';
-        if(!empty($path))
-        {
-            foreach($path as $part)
-            {
-                $controllerClass .= '\\'.$part;
-            }
-        } else {
-            $controllerClass .= '\Index';
-        }
-        $this->uriParams = [
-            'path' => $path,
-            'request' => $_REQUEST,
-            'controllerClass' => $controllerClass
-        ];
-        if(is_dir(BP.'InstallAssets'))
-        {
-            if(!$this->isPath('install/*'))
-            {
-                $this->redirect('install');
-            } else {
-                $this->uriParams['controllerClass'] = str_replace(
-                    '\App',
-                    '\InstallAssets',
-                    $controllerClass
-                );
-                if(!require_once('InstallAssets/Autoloader.php'))
-                {
-                    die('/InstallAssets/Autoloader.php not found.');
-                }
-            }
-        }
-        if(!empty($path) && !$this->isValidPath($path))
+        $this->registeredControllers = config()['registeredControllers'];
+        $this->processUri();
+        $this->checkInstallation();
+        if(!empty($this->uriParams['path']) && !$this->isValidPath($this->uriParams['path']))
         {
             $this->redirect('404', '404');
+        }
+        if(class_exists($this->uriParams['controllerClass']))
+        {
+            $this->controller = new $this->uriParams['controllerClass']();
         }
     }
 
@@ -116,6 +91,60 @@ class Router
     }
 
     /**
+     * @return mixed
+     */
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    /**
+     * @param string $controller
+     * @param array $path
+     */
+    public function registerController($controller, $path = [])
+    {
+        if(empty($path))
+        {
+            $this->registeredControllers[] = $controller;
+        } else {
+            $this->registeredControllers[$controller] = $path;
+        }
+    }
+
+    /**
+     * set uri params
+     */
+    private function processUri()
+    {
+        $path = [];
+        if(isset($_REQUEST['path']))
+        {
+            $path = explode('/', $_REQUEST['path']);
+            if(empty(end($path)))
+            {
+                array_pop($path);
+            }
+            unset($_REQUEST['path']);
+        }
+        $controllerClass = '\App\Controller';
+        if(!empty($path))
+        {
+            foreach($path as $part)
+            {
+                $controllerClass .= '\\'.ucfirst(strtolower($part));
+            }
+        } else {
+            $controllerClass .= '\Index';
+        }
+        $this->uriParams = [
+            'path' => $path,
+            'request' => $_REQUEST,
+            'controllerClass' => $controllerClass
+        ];
+    }
+
+    /**
      * @param array $params
      * @param bool|string $httpStatus
      */
@@ -153,7 +182,7 @@ class Router
      */
     private function isValidPath($paths)
     {
-        $array = config()['registeredControllers'];
+        $array = $this->registeredControllers;
         $lastLevel = array_pop($paths);
         if(empty($paths))
         {
@@ -198,5 +227,58 @@ class Router
             return array_key_exists($pattern, $flippedPath);
         }
         return true;
+    }
+
+    /**
+     * set install params if InstallAssets exists
+     */
+    private function checkInstallation()
+    {
+        if(is_dir(BP.'InstallAssets'))
+        {
+            if(!$this->isPath('install/*'))
+            {
+                $this->redirect('install');
+            } else {
+                $this->uriParams['controllerClass'] = str_replace(
+                    '\App',
+                    '\InstallAssets',
+                    $this->uriParams['controllerClass']
+                );
+                if(!require_once('InstallAssets/Autoloader.php'))
+                {
+                    die('/InstallAssets/Autoloader.php not found.');
+                }
+            }
+            $this->registeredControllers['install'] = [
+                'system-check',
+                'database' => [
+                    'form',
+                    'install'
+                ],
+                'configuration',
+                'finished'
+            ];
+            theme()->addJs(
+                'https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js',
+                [
+                    'type' => theme()::RESOURCE_TYPE_EXTERNAL,
+                    'sort' => -500
+                ]
+            );
+            theme()->addJs(
+                'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
+                [
+                    'type' => theme()::RESOURCE_TYPE_EXTERNAL,
+                    'sort' => -499
+                ]
+            );
+            theme()->addLess(
+                'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css',
+                ['type' => theme()::RESOURCE_TYPE_EXTERNAL,
+                    'sort' => -500
+                ]
+            );
+        }
     }
 }
