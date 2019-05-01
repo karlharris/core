@@ -153,7 +153,6 @@ class Router
      */
     private function isValidPath($paths)
     {
-        logger()->log('test3');
         $array = config()['registeredControllers'];
         $lastLevel = array_pop($paths);
         if(empty($paths))

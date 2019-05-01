@@ -7,5 +7,3 @@ if(!require_once('App/Autoloader.php'))
 {
     die('Autoloader.php not found.');
 }
-
-router();

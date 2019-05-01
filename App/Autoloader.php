@@ -58,7 +58,7 @@ function config()
         {
             $config = array_merge(require(BP.'App/default_config.php'), require(BP.'config.php'));
         } catch(\Exception $e) {
-            die('config() -> '.$e->getMessage());
+            logger()->log('config() -> '.$e->getMessage());
         }
         if(isset($config['db']))
         {
@@ -73,7 +73,32 @@ function config()
     }
     return $config;
 }
-config();
+
+/**
+ * @return \App\Core\Logging
+ */
+function logger()
+{
+    static $log;
+    if(!$log instanceOf \App\Core\Logging)
+    {
+        $log = new \App\Core\Logging();
+    }
+    return $log;
+}
+
+/**
+ * @return \App\Core\Utilities
+ */
+function utilities()
+{
+    static $utilities;
+    if(!$utilities instanceOf \App\Core\Utilities)
+    {
+        $utilities = new \App\Core\Utilities();
+    }
+    return $utilities;
+}
 
 /**
  * @return \App\Core\Router
@@ -88,29 +113,7 @@ function router()
     return $router;
 }
 
-/**
- * @return \App\Core\Logging
- */
-function logger()
-{
-    static $log;
-    if(!$log instanceOf \App\Core\Logging)
-    {
-        $log = new \App\Core\Logging();
-    }
-    return $log;
-}
+utilities();
 logger();
-
-/**
- * @return \App\Core\Utilities
- */
-function utilities()
-{
-    static $utilities;
-    if(!$utilities instanceOf \App\Core\Utilities)
-    {
-        $utilities = new \App\Core\Utilities();
-    }
-    return $utilities;
-}
+config();
+router();
