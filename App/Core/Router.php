@@ -33,7 +33,6 @@ class Router
     {
         $this->registeredControllers = config()['registeredControllers'];
         $this->processUri();
-        $this->checkInstallation();
         if(!empty($this->uriParams['path']) && !$this->isValidPath($this->uriParams['path']))
         {
             $this->redirect('404', '404');
@@ -235,61 +234,5 @@ class Router
             return array_key_exists($pattern, $flippedPath);
         }
         return true;
-    }
-
-    /**
-     * set install params if InstallAssets exists
-     */
-    private function checkInstallation()
-    {
-        if(is_dir(BP.'InstallAssets'))
-        {
-            if(!$this->isPath('install/*'))
-            {
-                $this->redirect('install');
-            } else {
-                $this->uriParams['controllerClass'] = str_replace(
-                    '\App',
-                    '\InstallAssets',
-                    $this->uriParams['controllerClass']
-                );
-                if(!(file_exists('InstallAssets/Autoloader.php') && require_once('InstallAssets/Autoloader.php')))
-                {
-                    die("<br>/InstallAssets/Autoloader.php not found.
-                    <br><br>If you already installed the system, try to delete the directory /InstallAssets.
-                    <br>If you haven´t installed the system yet, you have to re-clone (or re-download) the whole thing.");
-                }
-            }
-            $this->registeredControllers['install'] = [
-                'system-check',
-                'database' => [
-                    'form',
-                    'install'
-                ],
-                'configuration',
-                'finished'
-            ];
-            theme()->addJs(
-                'https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js',
-                [
-                    'type' => theme()::RESOURCE_TYPE_EXTERNAL,
-                    'sort' => -500
-                ]
-            );
-            theme()->addJs(
-                'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js',
-                [
-                    'type' => theme()::RESOURCE_TYPE_EXTERNAL,
-                    'sort' => -499
-                ]
-            );
-            theme()->addLess(
-                'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css',
-                [
-                    'type' => theme()::RESOURCE_TYPE_EXTERNAL,
-                    'sort' => -500
-                ]
-            );
-        }
     }
 }
