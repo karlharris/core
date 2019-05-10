@@ -125,6 +125,10 @@ class Theme
             $this->setResource($this->less, config()['defaultLess']['internal'], 'less');
             $this->setResource($this->less, config()['defaultLess']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
         }
+        echo '<pre>';
+        print_r($this->js);
+        print_r($this->less);
+        echo '</pre>';
     }
 
     /**
