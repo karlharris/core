@@ -4,9 +4,9 @@
  */
 
 spl_autoload_register(
-    /**
-     * @param string $class
-     */
+/**
+ * @param string $class
+ */
     function($class)
     {
         $prefix = 'InstallAssets\\';

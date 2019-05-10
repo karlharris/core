@@ -79,14 +79,14 @@ function config()
 }
 
 /**
- * @return \App\Core\Logging
+ * @return \App\Core\Logger
  */
 function logger()
 {
     static $log;
-    if(!$log instanceOf \App\Core\Logging)
+    if(!$log instanceOf \App\Core\Logger)
     {
-        $log = new \App\Core\Logging();
+        $log = new \App\Core\Logger();
     }
     return $log;
 }

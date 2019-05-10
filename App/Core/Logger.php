@@ -6,10 +6,10 @@
 namespace App\Core;
 
 /**
- * Class Logging
+ * Class Logger
  * @package App\Core
  */
-class Logging
+class Logger
 {
     /**
      * @var string

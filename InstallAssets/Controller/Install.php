@@ -8,5 +8,8 @@ namespace InstallAssets\Controller;
  */
 class Install
 {
-
+    public function preDispatchTheme()
+    {
+        echo 'preDispatchTheme()<br>';
+    }
 }

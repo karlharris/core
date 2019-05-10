@@ -113,6 +113,14 @@ class Router
     }
 
     /**
+     * @return array
+     */
+    public function getRegisteredControllers()
+    {
+        return $this->registeredControllers;
+    }
+
+    /**
      * set uri params
      */
     private function processUri()
@@ -182,25 +190,25 @@ class Router
      */
     private function isValidPath($paths)
     {
-        $array = $this->registeredControllers;
+        $controllers = $this->registeredControllers;
         $lastLevel = array_pop($paths);
         if(empty($paths))
         {
-            return array_key_exists($lastLevel, $array) || in_array($lastLevel, $array);
+            return array_key_exists($lastLevel, $controllers) || in_array($lastLevel, $controllers);
         }
         foreach($paths as $path)
         {
-            if(!is_array($array))
+            if(!is_array($controllers))
             {
                 return false;
-            } elseif(array_key_exists($path, $array))
+            } elseif(array_key_exists($path, $controllers))
             {
-                $array = $array[$path];
+                $controllers = $controllers[$path];
             } else {
                 return false;
             }
         }
-        return array_key_exists($lastLevel, $array) || in_array($lastLevel, $array);
+        return array_key_exists($lastLevel, $controllers) || in_array($lastLevel, $controllers);
     }
 
     /**
@@ -245,9 +253,11 @@ class Router
                     '\InstallAssets',
                     $this->uriParams['controllerClass']
                 );
-                if(!require_once('InstallAssets/Autoloader.php'))
+                if(!(file_exists('InstallAssets/Autoloader.php') && require_once('InstallAssets/Autoloader.php')))
                 {
-                    die('/InstallAssets/Autoloader.php not found.');
+                    die("<br>/InstallAssets/Autoloader.php not found.
+                    <br><br>If you already installed the system, try to delete the directory /InstallAssets.
+                    <br>If you haven´t installed the system yet, you have to re-clone (or re-download) the whole thing.");
                 }
             }
             $this->registeredControllers['install'] = [
@@ -275,7 +285,8 @@ class Router
             );
             theme()->addLess(
                 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css',
-                ['type' => theme()::RESOURCE_TYPE_EXTERNAL,
+                [
+                    'type' => theme()::RESOURCE_TYPE_EXTERNAL,
                     'sort' => -500
                 ]
             );
