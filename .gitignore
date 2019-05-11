@@ -1,4 +1,5 @@
-.idea
-config.php
-App/default_config.php
-var
+/.idea
+/config.php
+/App/default_config.php
+/var/
+/vendor/

@@ -231,7 +231,7 @@ class Router
                 }
             }
         } else {
-            return array_key_exists($pattern, $flippedPath);
+            return $pattern === '*' || array_key_exists($pattern, $flippedPath);
         }
         return true;
     }
