@@ -23,11 +23,19 @@ class Theme
      */
     const RESOURCE_TYPE_INTERNAL = 'internal';
 
+    /**
+     * @var array
+     */
     private $defaultResourceOptions = [
         'sort' => 0,
         'type' => self::RESOURCE_TYPE_INTERNAL,
-        'path' => DTP.'resources'.DS
+        'path' => TP.'default'.DS.'resources'.DS
     ];
+
+    /**
+     * @var string
+     */
+    private $theme;
 
     /**
      * @var bool
@@ -50,6 +58,15 @@ class Theme
     private $less = [];
 
     /**
+     * Theme constructor.
+     * @param string $theme
+     */
+    public function __construct()
+    {
+        $this->theme = config()['theme'];
+    }
+
+    /**
      * @param bool $noRender
      */
     public function setNoRender($noRender)
@@ -63,6 +80,22 @@ class Theme
     public function setLoadDefaultResources($loadDefaultResources)
     {
         $this->loadDefaultResources = $loadDefaultResources;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTheme()
+    {
+        return $this->theme;
+    }
+
+    /**
+     * @param string $theme
+     */
+    public function setTheme($theme)
+    {
+        $this->theme = $theme;
     }
 
     /**
@@ -124,6 +157,8 @@ class Theme
             $this->setResource($this->js, config()['defaultJs']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
             $this->setResource($this->less, config()['defaultLess']['internal'], 'less');
             $this->setResource($this->less, config()['defaultLess']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
+            utilities()->sortArrayByValue($this->js);
+            utilities()->sortArrayByValue($this->less);
         }
         echo '<pre>';
         print_r($this->js);
@@ -143,11 +178,50 @@ class Theme
         {
             foreach($set as $data)
             {
-                $array[] = [
-                    'file' => ($source === 'internal' ? DTP.$type.DS.$data['file'] : $data['file']),
-                    'sort' => $data['sort']
-                ];
+                if(is_string($data))
+                {
+                    $data = [
+                        'file' => $data,
+                        'sort' => 0
+                    ];
+                }
+                if($source === 'internal')
+                {
+                    $path = $this->getPath('resources'.DS.$type.DS.$data['file']);
+                } else {
+                    $path = $data['file'];
+                }
+                if($path)
+                {
+                    $array[] = [
+                        'file' => $path,
+                        'sort' => $data['sort']
+                    ];
+                }
             }
         }
+    }
+
+    /**
+     * @param $path
+     * @return bool|string
+     */
+    private function getPath($path)
+    {
+        if(!empty(config()['inheritTheme']))
+        {
+            foreach(array_reverse(config()['inheritTheme']) as $theme)
+            {
+                if(file_exists(TP.$theme.DS.$path))
+                {
+                    return TP.$theme.DS.$path;
+                }
+            }
+        }
+        if(file_exists(TP.config()['theme'].DS.$path))
+        {
+            return TP.config()['theme'].DS.$path;
+        }
+        return false;
     }
 }

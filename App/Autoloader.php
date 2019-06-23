@@ -23,10 +23,6 @@ defined('BU') ?: define('BU', (isSecure ? 'https://' : 'http://').(isset($_SERVE
  * theme path
  */
 defined('TP') ?: define('TP', BP.'theme'.DS);
-/**
- * default theme resource path
- */
-defined('DTP') ?: define('DTP', BP.'theme'.DS.'default'.DS.'resources'.DS);
 
 require_once(BP.'vendor/autoload.php');
 

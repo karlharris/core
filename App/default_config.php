@@ -10,6 +10,10 @@ return [
     'loggerEmail' => '',
     'show_errors' => true,
     'timezone' => 'Europe/Berlin',
+    'theme' => 'default',
+    'inheritTheme' => [
+        'test'
+    ],
     'defaultJs' => [
         'internal' => [
             [
