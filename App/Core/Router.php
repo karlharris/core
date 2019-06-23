@@ -5,6 +5,8 @@
 
 namespace App\Core;
 
+use stdClass;
+
 /**
  * Class Router
  * @package App\Core
@@ -17,9 +19,19 @@ class Router
     private $uriParams = [];
 
     /**
-     * @var mixed
+     * @var null|object
      */
     private $controller = null;
+
+    /**
+     * @var string
+     */
+    private $controllerClass = '\\App\\Controllers\\Index';
+
+    /**
+     * @var string
+     */
+    private $actionName = 'index';
 
     /**
      * @var array
@@ -35,11 +47,21 @@ class Router
         $this->processUri();
         if(!empty($this->uriParams['path']) && !$this->isValidPath($this->uriParams['path']))
         {
-            $this->redirect('404', '404');
+//            $this->redirect('404', '404');
+            echo '<br>---------------------<br>is 404<br>---------------------<br>';
         }
-        if(class_exists($this->uriParams['controllerClass']))
+        if(class_exists($this->controllerClass))
         {
             $this->controller = new $this->uriParams['controllerClass']();
+        } else {
+            $this->controller = new class {
+                private $name = 'index';
+                public function getName()
+                {
+                    return $this->name;
+                }
+            };
+            $this->controllerClass = '';
         }
     }
 
@@ -84,17 +106,25 @@ class Router
     /**
      * @return mixed
      */
-    public function getControllerClass()
-    {
-        return $this->uriParams['controllerClass'];
-    }
-
-    /**
-     * @return mixed
-     */
     public function getController()
     {
         return $this->controller;
+    }
+
+    /**
+     * @return string
+     */
+    public function getControllerClass()
+    {
+        return $this->controllerClass;
+    }
+
+    /**
+     * @return string
+     */
+    public function getActionName()
+    {
+        return $this->actionName;
     }
 
     /**
@@ -134,20 +164,17 @@ class Router
             }
             unset($_REQUEST['path']);
         }
-        $controllerClass = '\App\Controller';
         if(!empty($path))
         {
+            $this->controllerClass = '\App\Controllers';
             foreach($path as $part)
             {
-                $controllerClass .= '\\'.ucfirst(strtolower($part));
+                $this->controllerClass .= '\\'.ucfirst(strtolower($part));
             }
-        } else {
-            $controllerClass .= '\Index';
         }
         $this->uriParams = [
             'path' => $path,
-            'request' => $_REQUEST,
-            'controllerClass' => $controllerClass
+            'request' => $_REQUEST
         ];
     }
 

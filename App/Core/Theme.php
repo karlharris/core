@@ -43,11 +43,6 @@ class Theme
     private $noRender = false;
 
     /**
-     * @var bool
-     */
-    private $loadDefaultResources = true;
-
-    /**
      * @var array
      */
     private $js = [];
@@ -59,7 +54,6 @@ class Theme
 
     /**
      * Theme constructor.
-     * @param string $theme
      */
     public function __construct()
     {
@@ -72,14 +66,6 @@ class Theme
     public function setNoRender($noRender)
     {
         $this->noRender = $noRender;
-    }
-
-    /**
-     * @param bool $loadDefaultResources
-     */
-    public function setLoadDefaultResources($loadDefaultResources)
-    {
-        $this->loadDefaultResources = $loadDefaultResources;
     }
 
     /**
@@ -132,13 +118,15 @@ class Theme
 
     /**
      * is triggered before loading resources
+     * @return bool
      */
     private function preDispatch()
     {
         if(!is_null(router()->getController()) && method_exists(router()->getController(), 'preDispatchTheme'))
         {
-            router()->getController()->preDispatchTheme();
+            return router()->getController()->preDispatchTheme();
         }
+        return true;
     }
 
     /**
@@ -146,24 +134,22 @@ class Theme
      */
     public function loadResources()
     {
-        $this->preDispatch();
-        if($this->noRender)
+        if(!$this->preDispatch() || $this->noRender)
         {
             return;
         }
-        if($this->loadDefaultResources)
+        $this->setResource($this->js, config()['defaultJs']['internal'], 'js');
+        $this->setResource($this->js, config()['defaultJs']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
+        $this->setResource($this->less, config()['defaultLess']['internal'], 'less');
+        $this->setResource($this->less, config()['defaultLess']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
+        if(isset($this->js[0])) /** faster than count($this->js) > 0 */
         {
-            $this->setResource($this->js, config()['defaultJs']['internal'], 'js');
-            $this->setResource($this->js, config()['defaultJs']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
-            $this->setResource($this->less, config()['defaultLess']['internal'], 'less');
-            $this->setResource($this->less, config()['defaultLess']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
             utilities()->sortArrayByValue($this->js);
+        }
+        if(isset($this->less[0])) /** faster than count($this->less) > 0 */
+        {
             utilities()->sortArrayByValue($this->less);
         }
-        echo '<pre>';
-        print_r($this->js);
-        print_r($this->less);
-        echo '</pre>';
     }
 
     /**

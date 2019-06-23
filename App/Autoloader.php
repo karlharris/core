@@ -111,3 +111,4 @@ logger();
 config();
 router();
 theme();
+theme()->loadResources();
