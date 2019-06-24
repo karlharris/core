@@ -63,7 +63,7 @@ class Theme
     /**
      * @param bool $noRender
      */
-    public function setNoRender($noRender)
+    public function setNoRender($noRender = true)
     {
         $this->noRender = $noRender;
     }
@@ -122,7 +122,7 @@ class Theme
      */
     private function preDispatch()
     {
-        if(!is_null(router()->getController()) && method_exists(router()->getController(), 'preDispatchTheme'))
+        if(method_exists(router()->getController(), 'preDispatchTheme'))
         {
             return router()->getController()->preDispatchTheme();
         }

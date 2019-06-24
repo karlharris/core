@@ -5,7 +5,7 @@
 
 namespace App\Core;
 
-use stdClass;
+use function config;
 
 /**
  * Class Router
@@ -47,20 +47,12 @@ class Router
         $this->processUri();
         if(!empty($this->uriParams['path']) && !$this->isValidPath($this->uriParams['path']))
         {
-//            $this->redirect('404', '404');
-            echo '<br>---------------------<br>is 404<br>---------------------<br>';
+            $this->redirect('404', '404');
         }
         if(class_exists($this->controllerClass))
         {
-            $this->controller = new $this->uriParams['controllerClass']();
+            $this->controller = new $this->controllerClass();
         } else {
-            $this->controller = new class {
-                private $name = 'index';
-                public function getName()
-                {
-                    return $this->name;
-                }
-            };
             $this->controllerClass = '';
         }
     }
@@ -199,7 +191,7 @@ class Router
         }
 
         $path = '/';
-        if(count($params) > 0)
+        if(isset($params[0]))
         {
             foreach($params as $param)
             {
