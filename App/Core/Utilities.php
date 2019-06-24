@@ -61,7 +61,7 @@ class Utilities
      * @param string $keySpace
      * @return string
      */
-    public function createRandomStr($length, $specials = '!§$%&/()=?+*#-_', $keySpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    public function createRandomStr($length = 12, $specials = '!§$%&/()=?+*#-_', $keySpace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     {
         if($specials)
         {
