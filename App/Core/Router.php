@@ -21,7 +21,7 @@ class Router
     /**
      * @var null|object
      */
-    private $controller = null;
+    private $controller = \null;
 
     /**
      * @var string
@@ -52,8 +52,6 @@ class Router
         if(class_exists($this->controllerClass))
         {
             $this->controller = new $this->controllerClass();
-        } else {
-            $this->controllerClass = '';
         }
     }
 
@@ -70,7 +68,7 @@ class Router
      * @param mixed default
      * @return mixed
      */
-    public function getRequestParam($name, $default = false)
+    public function getRequestParam($name, $default = \false)
     {
         if(isset($this->uriParams['request'][$name]))
         {
@@ -156,13 +154,20 @@ class Router
             }
             unset($_REQUEST['path']);
         }
+        $this->controllerClass = '\App\Controllers';
         if(!empty($path))
         {
-            $this->controllerClass = '\App\Controllers';
-            foreach($path as $part)
+            foreach($path as $index => $part)
             {
-                $this->controllerClass .= '\\'.ucfirst(strtolower($part));
+                if(!isset($path[$index+1]))
+                {
+                    $this->actionName = $part;
+                } else {
+                    $this->controllerClass .= '\\'.ucfirst(strtolower($part));
+                }
             }
+        } else {
+            $this->controllerClass .= '\\Index';
         }
         $this->uriParams = [
             'path' => $path,
@@ -174,7 +179,7 @@ class Router
      * @param array $params
      * @param bool|string $httpStatus
      */
-    public function redirect($params = [], $httpStatus = false)
+    public function redirect($params = [], $httpStatus = \false)
     {
         if($httpStatus === '301')
         {
@@ -182,7 +187,7 @@ class Router
         }
         if($httpStatus === '404')
         {
-            header("HTTP/1.0 404 Not Found", true, 404);
+            header("HTTP/1.0 404 Not Found", \true, 404);
         }
 
         if(is_string($params))
@@ -218,12 +223,12 @@ class Router
         {
             if(!is_array($controllers))
             {
-                return false;
+                return \false;
             } elseif(array_key_exists($path, $controllers))
             {
                 $controllers = $controllers[$path];
             } else {
-                return false;
+                return \false;
             }
         }
         return array_key_exists($lastLevel, $controllers) || in_array($lastLevel, $controllers);
@@ -236,22 +241,22 @@ class Router
     public function isPath($pattern)
     {
         $flippedPath = array_flip($this->getPathParams());
-        if(strpos($pattern, '/') !== false)
+        if(strpos($pattern, '/') !== \false)
         {
             $pathArray = explode('/', $pattern);
             foreach($pathArray as $key => $path)
             {
                 if($path === '*')
                 {
-                    return true;
+                    return \true;
                 } elseif(!array_key_exists($path, $flippedPath))
                 {
-                    return false;
+                    return \false;
                 }
             }
         } else {
             return $pattern === '*' || array_key_exists($pattern, $flippedPath);
         }
-        return true;
+        return \true;
     }
 }

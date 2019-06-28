@@ -5,6 +5,10 @@
 
 namespace App\Core;
 
+use Exception;
+
+use function logger;
+
 /**
  * Class Utilities
  *
@@ -24,7 +28,7 @@ class Utilities
     {
         if(is_array($array))
         {
-            $sort = array();
+            $sort = [];
             foreach ($array as $key => $row)
             {
                 $sort[$key] = $row[$sortKey];
@@ -41,7 +45,7 @@ class Utilities
      * @param string $charsToClean
      * @return string
      */
-    public function cleanString($str, $allowWhitespaces = false, $allowBreaks = false, $charsToClean = '<>|,;.:-#\'+*~´`?ß\\=})]([/{&%$§"!²³^°@€µäÄüÜöÖ-')
+    public function cleanString($str, $allowWhitespaces = \false, $allowBreaks = \false, $charsToClean = '<>|,;.:-#\'+*~´`?ß\\=})]([/{&%$§"!²³^°@€µäÄüÜöÖ-')
     {
         $str = str_replace(str_split($charsToClean), '', $str);
         if(!$allowWhitespaces)
@@ -50,7 +54,7 @@ class Utilities
         }
         if(!$allowBreaks)
         {
-            $str = str_replace(array('<br>','<br/>','<br />',"\n\r","\r\n","\n","\r",PHP_EOL), '', $str);
+            $str = str_replace(['<br>','<br/>','<br />',"\n\r","\r\n","\n","\r",\PHP_EOL], '', $str);
         }
         return $str;
     }
@@ -85,7 +89,7 @@ class Utilities
      */
     public function mkd($dirPath, $mode = 0777)
     {
-        return is_dir($dirPath) || mkdir($dirPath, $mode, true);
+        return is_dir($dirPath) || mkdir($dirPath, $mode, \true);
     }
 
     /**
@@ -119,7 +123,7 @@ class Utilities
                 }
                 $resolvedPath = $temp;
             }
-        } catch(\Exception $e)
+        } catch(Exception $e)
         {
             logger()->log('Utilities::rmkdir() -> '.$e->getMessage());
         }

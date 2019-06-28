@@ -5,6 +5,9 @@
 
 namespace App\Core;
 
+use function utilities;
+use function config;
+
 /**
  * Class Logger
  * @package App\Core
@@ -29,7 +32,7 @@ class Logger
      */
     private $defaultOptions = [
         'type' => 'error',
-        'backtrace' => true,
+        'backtrace' => \true,
         'mode' => '',
         'email' => '',
         'file' => ''

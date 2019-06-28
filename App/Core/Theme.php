@@ -5,6 +5,10 @@
 
 namespace App\Core;
 
+use function config;
+use function router;
+use function utilities;
+
 /**
  * Class Theme
  * @package App\Core
@@ -40,7 +44,7 @@ class Theme
     /**
      * @var bool
      */
-    private $noRender = false;
+    private $noRender = \false;
 
     /**
      * @var array
@@ -63,7 +67,7 @@ class Theme
     /**
      * @param bool $noRender
      */
-    public function setNoRender($noRender = true)
+    public function setNoRender($noRender = \true)
     {
         $this->noRender = $noRender;
     }
@@ -126,7 +130,7 @@ class Theme
         {
             return router()->getController()->preDispatchTheme();
         }
-        return true;
+        return \true;
     }
 
     /**
@@ -208,6 +212,6 @@ class Theme
         {
             return TP.config()['theme'].DS.$path;
         }
-        return false;
+        return \false;
     }
 }

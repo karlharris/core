@@ -1,6 +1,6 @@
 {
     "name": "karlharris/core",
-    "description": "This is a project that is under cunstruction (and it is my first try with packagist and composer, so please forgive me if something is wrong)",
+    "description": "This is a project that is under construction (and it is my first try with packagist and composer, so please forgive me if something is wrong)",
     "type": "project",
     "license": "MIT",
     "authors": [
@@ -16,5 +16,8 @@
         "psr-4": {
             "App\\": "App/"
         }
+    },
+    "config": {
+        "optimize-autoloader": true
     }
 }
