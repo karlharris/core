@@ -7,8 +7,9 @@ return [
     'registeredControllers' => [
         '404'
     ],
+    'debug' => \false,
     'loggerEmail' => '',
-    'show_errors' => true,
+    'show_errors' => \true,
     'timezone' => 'Europe/Berlin',
     'theme' => 'default',
     'inheritTheme' => [

@@ -12,4 +12,7 @@ echo '<pre><br>';
 print_r(router()->getControllerClass());
 echo '<br>';
 print_r(router()->getActionName());
+echo '<br>';
+print_r(theme()->getLess());
+print_r(theme()->getJs());
 echo '</pre>';
