@@ -111,8 +111,7 @@ function theme()
 }
 
 utilities();
-config();
 logger();
+config();
 router();
-theme();
 theme()->loadResources();

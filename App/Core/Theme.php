@@ -222,6 +222,9 @@ class Theme
         $this->collectTemplates();
     }
 
+    /**
+     * collect templates
+     */
     private function collectTemplates()
     {
         $parts = explode('\\', str_replace('\\app\controllers\\', '', strtolower(router()->getControllerClass())));
@@ -249,12 +252,27 @@ class Theme
             }
             $sort++;
         }
+        $this->output();
+    }
+
+    /**
+     * output rendered phtml
+     */
+    private function output()
+    {
         $output = '';
         foreach($this->templates as $template)
         {
             $output .= $this->renderPhtml($template);
         }
-        echo $this->minifyOutput($output);
+        $copyrightDate = (date('Y') === '2018' ? '2018' : '2018 - '.date('Y'));
+        $copyright = <<<COPYRIGHT
+<!--
+  -- Copyright (c) $copyrightDate. karlharris.org
+  -->
+
+COPYRIGHT;
+        echo $copyright.$this->minifyOutput($output);
     }
 
     /**
