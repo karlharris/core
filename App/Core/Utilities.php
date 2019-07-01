@@ -5,10 +5,6 @@
 
 namespace App\Core;
 
-use Exception;
-
-use function logger;
-
 /**
  * Class Utilities
  *
