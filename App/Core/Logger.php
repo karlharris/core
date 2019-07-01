@@ -6,7 +6,6 @@
 namespace App\Core;
 
 use function utilities;
-use function config;
 
 /**
  * Class Logger
@@ -52,7 +51,7 @@ class Logger
         $this->file = BP.$filePath.'error_'.date('Ymd').'.log';
         if(!file_exists($this->file))
         {
-            utilities()->rmkdir($filePath);
+            utilities()->mkd($filePath, 0777, \true);
         }
     }
 

@@ -20,6 +20,10 @@ return [
             [
                 'file' => 'index.js',
                 'sort' => 0
+            ],[
+                'file' => 'test.js',
+                'sort' => -3,
+                'override' => \false
             ]
         ],
         'external' => []
@@ -32,5 +36,8 @@ return [
             ]
         ],
         'external' => []
+    ],
+    'cache' => [
+        'less' => \false
     ]
 ];

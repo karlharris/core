@@ -85,47 +85,20 @@ class Utilities
      *
      * @param $dirPath
      * @param int $mode
+     * @param bool $recursive
      * @return bool
      */
-    public function mkd($dirPath, $mode = 0777)
+    public function mkd($dirPath, $mode = 0777, $recursive = \true)
     {
-        return is_dir($dirPath) || mkdir($dirPath, $mode, \true);
+        return is_dir($dirPath) || mkdir($dirPath, $mode, $recursive);
     }
 
     /**
-     * create directory path
-     *
-     * @param string $path
-     * @return void
+     * @param $file
+     * @return bool
      */
-    public function rmkdir($path)
+    public function isValidFilename($file)
     {
-        try
-        {
-            $path = explode('/', $path);
-            if(empty($path[0]))
-            {
-                unset($path[0]);
-            }
-            if(empty($path[count($path)]))
-            {
-                unset($path[count($path)]);
-            }
-
-            $resolvedPath = BP;
-            $resolvedPath = substr($resolvedPath, 0, -1);
-            foreach($path as $dir)
-            {
-                $temp = $resolvedPath.DS.$dir;
-                if(!is_dir($temp))
-                {
-                    mkdir($temp);
-                }
-                $resolvedPath = $temp;
-            }
-        } catch(Exception $e)
-        {
-            logger()->log('Utilities::rmkdir() -> '.$e->getMessage());
-        }
+        return preg_match('/^([-\.\w]+)$/', $file) > 0;
     }
 }

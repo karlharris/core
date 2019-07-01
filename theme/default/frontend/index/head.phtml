@@ -5,6 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php
+    if(file_exists(theme()->getMinCssFile()))
+    {
+        echo '<style>'.file_get_contents(theme()->getMinCssFile()).'</style>';
+    }
+    ?>
 </head>
 <body class="<?php echo router()->getControllerClass().' '.router()->getActionName(); ?>">
 <main>

@@ -8,6 +8,7 @@ namespace App\Core;
 use function config;
 use function router;
 use function utilities;
+use function logger;
 
 /**
  * Class Theme
@@ -55,6 +56,16 @@ class Theme
      * @var array
      */
     private $less = [];
+
+    /**
+     * @var string
+     */
+    private $minCssFile = '';
+
+    /**
+     * @var array
+     */
+    private $templates = [];
 
     /**
      * Theme constructor.
@@ -139,6 +150,14 @@ class Theme
     }
 
     /**
+     * @return string
+     */
+    public function getMinCssFile()
+    {
+        return $this->minCssFile;
+    }
+
+    /**
      * is triggered before loading resources
      * @return bool
      */
@@ -156,6 +175,7 @@ class Theme
      */
     public function loadResources()
     {
+        $this->minCssFile = strtolower(CP.'css'.str_replace(['App\Controllers\\', '\\'], ['', '/'], router()->getControllerClass()).DS.router()->getActionName().'.css');
         if(!$this->preDispatch() || $this->noRender)
         {
             return;
@@ -171,16 +191,70 @@ class Theme
         }
         $this->setResource($this->js, config()['defaultJs']['internal'], 'js');
         $this->setResource($this->js, config()['defaultJs']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
-        $this->setResource($this->less, config()['defaultLess']['internal'], 'less');
-        $this->setResource($this->less, config()['defaultLess']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
         if(isset($this->js[0])) /** faster than count($this->js) > 0 or empty($this->js) */
         {
             utilities()->sortArrayByValue($this->js);
         }
-        if(isset($this->less[0]))
+        if(!config()['cache']['less'])
         {
-            utilities()->sortArrayByValue($this->less);
+            $this->setResource($this->less, config()['defaultLess']['internal'], 'less');
+            $this->setResource($this->less, config()['defaultLess']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
+            if(isset($this->less[0]))
+            {
+                utilities()->sortArrayByValue($this->less);
+                try
+                {
+                    $parser = new \Less_Parser(['compress'=>true]);
+                    foreach($this->less as $files)
+                    {
+                        foreach($files['files'] as $file)
+                        {
+                            $parser->parseFile($file['file'], str_replace(basename($file['file']), '', $file['file']));
+                        }
+                    }
+                    utilities()->mkd(str_replace('/'.basename($this->minCssFile), '', $this->minCssFile), 0777);
+                    file_put_contents($this->minCssFile, $parser->getCss());
+                } catch(\Exception $e) {
+                    logger()->log('failed to parse less files -> '.$e->getMessage());
+                }
+            }
         }
+        $this->collectTemplates();
+    }
+
+    private function collectTemplates()
+    {
+        $parts = explode('\\', str_replace('\\app\controllers\\', '', strtolower(router()->getControllerClass())));
+        $parts[] = router()->getActionName();
+        $paths = $used = [];
+        $sort = -1;
+        foreach($parts as $part)
+        {
+            $paths[] = 'frontend'.DS.(isset($used[0]) ? implode(DS, $used).DS : '').$part.DS;
+            $used[] = $part;
+        }
+        foreach(array_reverse($paths) as $path)
+        {
+            if($check = $this->getPaths($path.'head.phtml', \true))
+            {
+                $this->templates[] = $check['file'];
+            }
+            if($check = $this->getPaths($path.'index.phtml', \true))
+            {
+                $this->templates[] = $check['file'];
+            }
+            if($check = $this->getPaths($path.'foot.phtml', \true))
+            {
+                $this->templates[] = $check['file'];
+            }
+            $sort++;
+        }
+        $output = '';
+        foreach($this->templates as $template)
+        {
+            $output .= $this->renderPhtml($template);
+        }
+        echo $this->minifyOutput($output);
     }
 
     /**
@@ -208,7 +282,7 @@ class Theme
                 }
                 if($source === 'internal')
                 {
-                    if($files = $this->getPaths('assets'.DS.$type.DS.$data['file']))
+                    if($files = $this->getPaths('assets'.DS.$type.DS.$data['file'], (isset($data['override']) ? $data['override'] : \false)))
                     {
                         $array[] = [
                             'files' => $files,
@@ -227,9 +301,10 @@ class Theme
 
     /**
      * @param $path
+     * @param bool $override
      * @return bool|array
      */
-    private function getPaths($path)
+    private function getPaths($path, $override = \false)
     {
         $return = [];
         if(file_exists(TP.config()['theme'].DS.$path))
@@ -256,7 +331,56 @@ class Theme
         {
             return \false;
         } else {
+            if($override)
+            {
+                return array_pop($return);
+            }
             return $return;
         }
+    }
+
+    /**
+     * @param $file
+     * @param bool $echo
+     * @return bool|string
+     */
+    private function renderPhtml($file, $echo = false)
+    {
+        $output = '';
+        ob_start();
+        include($file);
+        $output .= ob_get_clean();
+        if(config()['debug'])
+        {
+            $output = '<div class="path-info-div"><small class="path-info-small" title="'.$file.'">FILE: '.$file.'</small>'.$output.'</div>';
+        }
+        if($echo)
+        {
+            echo $output;
+        } else {
+            return $output;
+        }
+        return false;
+    }
+
+    /**
+     * @param $output
+     * @return null|string|string[]
+     */
+    public function minifyOutput($output)
+    {
+        if(preg_match("/\<html/i",$output) == 1 && preg_match("/\<\/html\>/i",$output) == 1)
+        {
+            $output = preg_replace([
+                '/\>[^\S ]+/s',
+                '/[^\S ]+\</s',
+                '/(\s)+/s'
+            ], [
+                '>',
+                '<',
+                '\\1'
+            ], $output);
+        }
+        return $output;
     }
 }

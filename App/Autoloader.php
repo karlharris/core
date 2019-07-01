@@ -23,6 +23,10 @@ defined('BU') ?: define('BU', (isSecure ? 'https://' : 'http://').(isset($_SERVE
  * theme path
  */
 defined('TP') ?: define('TP', BP.'theme'.DS);
+/**
+ * cache path
+ */
+defined('CP') ?: define('CP', BP.'var'.DS.'cache'.DS);
 
 require_once(BP.'vendor/autoload.php');
 
@@ -107,8 +111,8 @@ function theme()
 }
 
 utilities();
-logger();
 config();
+logger();
 router();
 theme();
 theme()->loadResources();

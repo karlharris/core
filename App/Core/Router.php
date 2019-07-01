@@ -6,6 +6,7 @@
 namespace App\Core;
 
 use function config;
+use function utilities;
 
 /**
  * Class Router
