@@ -38,6 +38,7 @@ return [
         'external' => []
     ],
     'cache' => [
-        'less' => \false
+        'less' => \false,
+        'js' => \false
     ]
 ];

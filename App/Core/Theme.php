@@ -63,6 +63,11 @@ class Theme
     private $minCssFile = '';
 
     /**
+     * @var string
+     */
+    private $minJsFile = '';
+
+    /**
      * @var array
      */
     private $templates = [];
@@ -158,6 +163,14 @@ class Theme
     }
 
     /**
+     * @return string
+     */
+    public function getMinJsFile()
+    {
+        return $this->minJsFile;
+    }
+
+    /**
      * is triggered before loading resources
      * @return bool
      */
@@ -175,7 +188,9 @@ class Theme
      */
     public function loadResources()
     {
-        $this->minCssFile = strtolower(CP.'css'.str_replace(['App\Controllers\\', '\\'], ['', '/'], router()->getControllerClass()).DS.router()->getActionName().'.css');
+        $resourcePath = strtolower(str_replace(['App\Controllers\\', '\\'], ['', '/'], router()->getControllerClass()).DS.router()->getActionName());
+        $this->minCssFile = CP.'css'.$resourcePath.'.css';
+        $this->minJsFile = CP.'js'.$resourcePath.'.js';
         if(!$this->preDispatch() || $this->noRender)
         {
             return;
@@ -189,11 +204,30 @@ class Theme
                 ]
             ], 'less');
         }
-        $this->setResource($this->js, config()['defaultJs']['internal'], 'js');
-        $this->setResource($this->js, config()['defaultJs']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
-        if(isset($this->js[0])) /** faster than count($this->js) > 0 or empty($this->js) */
+        if(!config()['cache']['js'])
         {
-            utilities()->sortArrayByValue($this->js);
+            $this->setResource($this->js, config()['defaultJs']['internal'], 'js');
+            $this->setResource($this->js, config()['defaultJs']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
+            if(isset($this->js[0])) /** faster than count($this->js) > 0 or empty($this->js) */
+            {
+                utilities()->sortArrayByValue($this->js);
+                try
+                {
+                    $minifiedJs = '';
+                    foreach($this->js as $files)
+                    {
+                        foreach($files['files'] as $file)
+                        {
+                            /** not imported because not always necessary */
+                            $minifiedJs .= \JShrink\Minifier::minify(file_get_contents($file['file']));
+                        }
+                    }
+                    utilities()->mkd(str_replace('/'.basename($this->minJsFile), '', $this->minJsFile), 0777);
+                    file_put_contents($this->minJsFile, $minifiedJs);
+                } catch(\Exception $e) {
+                    logger()->log('failed to minify js files -> '.$e->getMessage());
+                }
+            }
         }
         if(!config()['cache']['less'])
         {

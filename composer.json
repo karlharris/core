@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "oyejorge/less.php": "1.7.0.14"
+        "oyejorge/less.php": "1.7.0.14",
+        "tedivm/jshrink": "~1.0"
     },
     "autoload": {
         "psr-4": {
