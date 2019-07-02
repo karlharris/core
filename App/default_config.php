@@ -15,7 +15,7 @@ return [
     'inheritTheme' => [
         'test'
     ],
-    'defaultJs' => [
+    'js' => [
         'internal' => [
             [
                 'file' => 'index.js',
@@ -28,7 +28,7 @@ return [
         ],
         'external' => []
     ],
-    'defaultLess' => [
+    'less' => [
         'internal' => [
             [
                 'file' => 'all.less',

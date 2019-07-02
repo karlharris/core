@@ -206,54 +206,70 @@ class Theme
         }
         if(!config()['cache']['js'])
         {
-            $this->setResource($this->js, config()['defaultJs']['internal'], 'js');
-            $this->setResource($this->js, config()['defaultJs']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
-            if(isset($this->js[0])) /** faster than count($this->js) > 0 or empty($this->js) */
-            {
-                utilities()->sortArrayByValue($this->js);
-                try
-                {
-                    $minifiedJs = '';
-                    foreach($this->js as $files)
-                    {
-                        foreach($files['files'] as $file)
-                        {
-                            /** not imported because not always necessary */
-                            $minifiedJs .= \JShrink\Minifier::minify(file_get_contents($file['file']));
-                        }
-                    }
-                    utilities()->mkd(str_replace('/'.basename($this->minJsFile), '', $this->minJsFile), 0777);
-                    file_put_contents($this->minJsFile, $minifiedJs);
-                } catch(\Exception $e) {
-                    logger()->log('failed to minify js files -> '.$e->getMessage());
-                }
-            }
+            $this->processJs();
         }
         if(!config()['cache']['less'])
         {
-            $this->setResource($this->less, config()['defaultLess']['internal'], 'less');
-            $this->setResource($this->less, config()['defaultLess']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
-            if(isset($this->less[0]))
-            {
-                utilities()->sortArrayByValue($this->less);
-                try
-                {
-                    $parser = new \Less_Parser(['compress'=>true]);
-                    foreach($this->less as $files)
-                    {
-                        foreach($files['files'] as $file)
-                        {
-                            $parser->parseFile($file['file'], str_replace(basename($file['file']), '', $file['file']));
-                        }
-                    }
-                    utilities()->mkd(str_replace('/'.basename($this->minCssFile), '', $this->minCssFile), 0777);
-                    file_put_contents($this->minCssFile, $parser->getCss());
-                } catch(\Exception $e) {
-                    logger()->log('failed to parse less files -> '.$e->getMessage());
-                }
-            }
+            $this->processLess();
         }
         $this->collectTemplates();
+    }
+
+    /**
+     * collect and process resource file
+     */
+    private function processJs()
+    {
+        $this->setResource($this->js, config()['js']['internal'], 'js');
+        $this->setResource($this->js, config()['js']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
+        if(isset($this->js[0])) /** faster than count($this->js) > 0 or empty($this->js) */
+        {
+            utilities()->sortArrayByValue($this->js);
+            try
+            {
+                $minifiedJs = '';
+                foreach($this->js as $files)
+                {
+                    foreach($files['files'] as $file)
+                    {
+                        /** not imported because not always necessary */
+                        $minifiedJs .= \JShrink\Minifier::minify(file_get_contents($file['file']));
+                    }
+                }
+                utilities()->mkd(str_replace('/'.basename($this->minJsFile), '', $this->minJsFile), 0777);
+                file_put_contents($this->minJsFile, $minifiedJs);
+            } catch(\Exception $e) {
+                logger()->log('failed to minify js files -> '.$e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * collect and process resource file
+     */
+    private function processLess()
+    {
+        $this->setResource($this->less, config()['less']['internal'], 'less');
+        $this->setResource($this->less, config()['less']['external'], 'less', self::RESOURCE_TYPE_EXTERNAL);
+        if(isset($this->less[0]))
+        {
+            utilities()->sortArrayByValue($this->less);
+            try
+            {
+                $parser = new \Less_Parser(['compress'=>true]);
+                foreach($this->less as $files)
+                {
+                    foreach($files['files'] as $file)
+                    {
+                        $parser->parseFile($file['file'], str_replace(basename($file['file']), '', $file['file']));
+                    }
+                }
+                utilities()->mkd(str_replace('/'.basename($this->minCssFile), '', $this->minCssFile), 0777);
+                file_put_contents($this->minCssFile, $parser->getCss());
+            } catch(\Exception $e) {
+                logger()->log('failed to parse less files -> '.$e->getMessage());
+            }
+        }
     }
 
     /**
