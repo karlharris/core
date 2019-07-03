@@ -118,7 +118,12 @@ class Theme
             'file' => $js,
             'sort' => ($params['sort'] ? $params['sort'] : 0)
         ];
-        $this->setResource($this->js, $resource, 'js', ($params['type'] === 'internal' ? self::RESOURCE_TYPE_INTERNAL : self::RESOURCE_TYPE_EXTERNAL));
+        $this->setResource(
+            $this->js,
+            $resource,
+            'js',
+            ($params['type'] === 'internal' ? self::RESOURCE_TYPE_INTERNAL : self::RESOURCE_TYPE_EXTERNAL)
+        );
     }
 
     /**
@@ -135,7 +140,12 @@ class Theme
             'file' => $less,
             'sort' => ($params['sort'] ? $params['sort'] : 0)
         ];
-        $this->setResource($this->less, $resource, 'less', ($params['type'] === 'internal' ? self::RESOURCE_TYPE_INTERNAL : self::RESOURCE_TYPE_EXTERNAL));
+        $this->setResource(
+            $this->less,
+            $resource,
+            'less',
+            ($params['type'] === 'internal' ? self::RESOURCE_TYPE_INTERNAL : self::RESOURCE_TYPE_EXTERNAL)
+        );
     }
 
     /**
@@ -204,11 +214,11 @@ class Theme
                 ]
             ], 'less');
         }
-        if(!config()['cache']['js'])
+        if(!config()['cache']['js'] || !file_exists($this->minJsFile))
         {
             $this->processJs();
         }
-        if(!config()['cache']['less'])
+        if(!config()['cache']['less'] || !file_exists($this->minCssFile))
         {
             $this->processLess();
         }
@@ -303,26 +313,6 @@ class Theme
             $sort++;
         }
         $this->output();
-    }
-
-    /**
-     * output rendered phtml
-     */
-    private function output()
-    {
-        $output = '';
-        foreach($this->templates as $template)
-        {
-            $output .= $this->renderPhtml($template);
-        }
-        $copyrightDate = (date('Y') === '2018' ? '2018' : '2018 - '.date('Y'));
-        $copyright = <<<COPYRIGHT
-<!--
-  -- Copyright (c) $copyrightDate. karlharris.org
-  -->
-
-COPYRIGHT;
-        echo $copyright.$this->minifyOutput($output);
     }
 
     /**
@@ -450,5 +440,25 @@ COPYRIGHT;
             ], $output);
         }
         return $output;
+    }
+
+    /**
+     * output rendered phtml
+     */
+    private function output()
+    {
+        $output = '';
+        foreach($this->templates as $template)
+        {
+            $output .= $this->renderPhtml($template);
+        }
+        $copyrightDate = (date('Y') === '2018' ? '2018' : '2018 - '.date('Y'));
+        $copyright = <<<COPYRIGHT
+<!--
+  -- Copyright (c) $copyrightDate. karlharris.org
+  -->
+
+COPYRIGHT;
+        echo $copyright.$this->minifyOutput($output);
     }
 }

@@ -1,4 +1,5 @@
 /.idea
 /config.php
-/var/
+/var/cache/*
+/var/log/*
 /vendor/
