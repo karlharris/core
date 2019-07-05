@@ -28,7 +28,7 @@ defined('TP') ?: define('TP', BP.'theme'.DS);
  */
 defined('CP') ?: define('CP', BP.'var'.DS.'cache'.DS);
 
-require_once(BP.'vendor/autoload.php');
+$composer = require_once(BP.'vendor/autoload.php');
 
 /**
  * @return array
@@ -110,8 +110,23 @@ function theme()
     return $theme;
 }
 
+/**
+ * @param bool|object $composer
+ * @return \App\Core\Plugin
+ */
+function plugin($composer = false)
+{
+    static $plugin;
+    if(!$plugin instanceOf \App\Core\Plugin)
+    {
+        $plugin = new \App\Core\Plugin($composer);
+    }
+    return $plugin;
+}
+
 utilities();
 logger();
 config();
 router();
+plugin($composer);
 theme()->loadResources();

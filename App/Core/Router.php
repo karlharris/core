@@ -6,7 +6,6 @@
 namespace App\Core;
 
 use function config;
-use function utilities;
 
 /**
  * Class Router
@@ -162,7 +161,7 @@ class Router
             {
                 if(!isset($path[$index+1]))
                 {
-                    $this->actionName = $part;
+                    $this->actionName = strtolower($part);
                 } else {
                     $this->controllerClass .= '\\'.ucfirst(strtolower($part));
                 }

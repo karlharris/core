@@ -12,5 +12,5 @@
     }
     ?>
 </head>
-<body class="ctl<?php echo str_replace('\\', '-', router()->getControllerClass()).' act-'.router()->getActionName(); ?>">
+<body class="ctl<?php echo str_replace(['\\app\controllers','\\'], ['','-'], strtolower(router()->getControllerClass())).' act-'.router()->getActionName(); ?>">
 <main>
