@@ -13,5 +13,8 @@ use App\Core\Plugin;
  */
 class TestPlugin extends Plugin
 {
-
+    /**
+     * @var bool
+     */
+    protected $active = \true;
 }

@@ -70,13 +70,20 @@ class Logger
      * Logging
      * @param $message
      * @param array $options
+     *
+     * Available options:
+     * type         - message type, like error, warning, info, ...
+     * backtrace    - if true, the debug_backtrace is printed
+     * mode         - mail or file / default is file, even if mode is set to mail but no loggerEmail is defined in config()
+     * email        - override email address for mail mode
+     * file         - path to logfile / default is /var/log/error_[DATE].log
      */
     public function log($message, $options = [])
     {
         $options = array_merge($this->defaultOptions, $options);
         $mode = ($options['mode'] === '' ? $this->mode : $options['mode']);
         ob_start();
-        echo "\n[".date('Y-m-d H:i:s')."]\n";
+        echo "\n[".date('Y-m-d H:i:s')."] [".$options['type']."]\n";
         echo $message."\n";
         if($options['backtrace'])
         {

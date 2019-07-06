@@ -24,6 +24,11 @@ class Plugin
     private $plugins = [];
 
     /**
+     * @var bool
+     */
+    protected $active = \false;
+
+    /**
      * Plugin constructor.
      * @param $composer
      */
@@ -36,12 +41,19 @@ class Plugin
             {
                 if(strpos($className, 'App\Plugins\\') !== \false)
                 {
-                    $pluginObject = new $className();
-                    if(is_subclass_of($pluginObject, 'App\Core\Plugin'))
+                    $classPath = explode('\\', $className);
+                    if(!isset($classPath[4]) && $classPath[2] === $classPath[3])
                     {
-                        $this->plugins[] = $pluginObject;
-                    } else {
-                        logger()->log($className.' is not extending the Plugin class (App\Core\Plugin)');
+                        $pluginObject = new $className();
+                        if(is_subclass_of($pluginObject, 'App\Core\Plugin') && $pluginObject->isActive())
+                        {
+                            $this->plugins[] = $pluginObject;
+                            echo '<pre>';
+                            print_r(get_class_methods(get_class($pluginObject)));
+                            echo '</pre>';
+                        } else {
+                            logger()->log($className.' is deactivated or not extending the Plugin class (App\Core\Plugin)');
+                        }
                     }
                 }
             }
@@ -51,8 +63,27 @@ class Plugin
     /**
      * @return array
      */
-    public function getPlugins()
+    public function getPluginNames()
     {
-        return $this->plugins;
+        return array_map(function($class)
+        {
+            return get_class($class);
+        }, $this->plugins);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * @param bool $active
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
     }
 }

@@ -59,19 +59,6 @@ function config()
 }
 
 /**
- * @return \App\Core\Logger
- */
-function logger()
-{
-    static $log;
-    if(!$log instanceOf \App\Core\Logger)
-    {
-        $log = new \App\Core\Logger();
-    }
-    return $log;
-}
-
-/**
  * @return \App\Core\Utilities
  */
 function utilities()
@@ -82,6 +69,19 @@ function utilities()
         $utilities = new \App\Core\Utilities();
     }
     return $utilities;
+}
+
+/**
+ * @return \App\Core\Logger
+ */
+function logger()
+{
+    static $log;
+    if(!$log instanceOf \App\Core\Logger)
+    {
+        $log = new \App\Core\Logger();
+    }
+    return $log;
 }
 
 /**
@@ -98,19 +98,6 @@ function router()
 }
 
 /**
- * @return \App\Core\Theme
- */
-function theme()
-{
-    static $theme;
-    if(!$theme instanceOf \App\Core\Theme)
-    {
-        $theme = new \App\Core\Theme();
-    }
-    return $theme;
-}
-
-/**
  * @param bool|object $composer
  * @return \App\Core\Plugin
  */
@@ -122,6 +109,19 @@ function plugin($composer = false)
         $plugin = new \App\Core\Plugin($composer);
     }
     return $plugin;
+}
+
+/**
+ * @return \App\Core\Theme
+ */
+function theme()
+{
+    static $theme;
+    if(!$theme instanceOf \App\Core\Theme)
+    {
+        $theme = new \App\Core\Theme();
+    }
+    return $theme;
 }
 
 utilities();
