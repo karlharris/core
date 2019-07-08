@@ -214,11 +214,11 @@ class Theme
                 ]
             ], 'less');
         }
-        if(!config()['cache']['js'] || !file_exists($this->minJsFile))
+        if(!config()['cache']['js'] || !stream_resolve_include_path($this->minJsFile))
         {
             $this->processJs();
         }
-        if(!config()['cache']['less'] || !file_exists($this->minCssFile))
+        if(!config()['cache']['less'] || !stream_resolve_include_path($this->minCssFile))
         {
             $this->processLess();
         }
@@ -365,7 +365,7 @@ class Theme
     private function getPaths($path, $override = \false)
     {
         $return = [];
-        if(file_exists(TP.config()['theme'].DS.$path))
+        if(stream_resolve_include_path(TP.config()['theme'].DS.$path))
         {
             $return[] = [
                 'file' => TP.config()['theme'].DS.$path,
@@ -376,7 +376,7 @@ class Theme
         {
             foreach(array_reverse(config()['inheritTheme']) as $index => $theme)
             {
-                if(file_exists(TP.$theme.DS.$path))
+                if(stream_resolve_include_path(TP.$theme.DS.$path))
                 {
                     $return[] = [
                         'file' => TP.$theme.DS.$path,

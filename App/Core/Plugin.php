@@ -24,9 +24,9 @@ class Plugin
     private $plugins = [];
 
     /**
-     * @var bool
+     * @var array
      */
-    protected $active = \false;
+    private $defaultConfig = [];
 
     /**
      * Plugin constructor.
@@ -37,6 +37,7 @@ class Plugin
         if($composer)
         {
             $this->composer = $composer;
+            $this->defaultConfig = require_once(BP.'App/default_plugin_config.php');
             foreach($this->composer->getClassMap() as $className => $file)
             {
                 if(strpos($className, 'App\Plugins\\') !== \false)
@@ -44,19 +45,25 @@ class Plugin
                     $classPath = explode('\\', $className);
                     if(!isset($classPath[4]) && $classPath[2] === $classPath[3])
                     {
-                        $pluginObject = new $className();
-                        if(is_subclass_of($pluginObject, 'App\Core\Plugin') && $pluginObject->isActive())
+                        $plugin['object'] = new $className();
+                        if(stream_resolve_include_path(PP.$classPath[2].DS.'config.php'))
                         {
-                            $this->plugins[] = $pluginObject;
-                            echo '<pre>';
-                            print_r(get_class_methods(get_class($pluginObject)));
-                            echo '</pre>';
+                            $plugin['config'] = array_merge($this->defaultConfig, include_once(PP.$classPath[2].DS.'config.php'));
+                        } else {
+                            $plugin['config'] = $this->defaultConfig;
+                        }
+                        if(is_subclass_of($plugin['object'], 'App\Core\Plugin') && $plugin['config']['active'])
+                        {
+                            $this->plugins[$className] = $plugin;
                         } else {
                             logger()->log($className.' is deactivated or not extending the Plugin class (App\Core\Plugin)');
                         }
                     }
                 }
             }
+            echo '<pre>';
+            var_dump($this->plugins);
+            echo '</pre>';
         }
     }
 
@@ -72,18 +79,10 @@ class Plugin
     }
 
     /**
-     * @return bool
+     * @return array
      */
-    public function isActive()
+    public function getDefaultConfig()
     {
-        return $this->active;
-    }
-
-    /**
-     * @param bool $active
-     */
-    public function setActive($active)
-    {
-        $this->active = $active;
+        return $this->defaultConfig;
     }
 }

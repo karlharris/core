@@ -27,6 +27,10 @@ defined('TP') ?: define('TP', BP.'theme'.DS);
  * cache path
  */
 defined('CP') ?: define('CP', BP.'var'.DS.'cache'.DS);
+/**
+ * plugin path
+ */
+defined('PP') ?: define('PP', BP.'App'.DS.'Plugins'.DS);
 
 $composer = require_once(BP.'vendor/autoload.php');
 
