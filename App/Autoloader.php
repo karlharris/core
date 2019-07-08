@@ -128,9 +128,24 @@ function theme()
     return $theme;
 }
 
+/**
+ * @return bool|\PDO
+ */
+function db()
+{
+    static $db;
+    if(!$db instanceof \PDO)
+    {
+        $db = new \App\Core\Database();
+        $db = $db->getDb();
+    }
+    return $db;
+}
+
 utilities();
 logger();
 config();
+db();
 router();
 plugin($composer);
 theme()->loadResources();
