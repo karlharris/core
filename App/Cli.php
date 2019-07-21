@@ -9,8 +9,6 @@ use Exception;
 use PDO;
 use PDOException;
 
-use function logger;
-
 if(PHP_SAPI !== 'cli')
 {
     header('Content-type: text/html; charset=utf-8', true, 503);
@@ -171,6 +169,9 @@ CONTENT;
     core:cache:clear            delete all cache files
     core:cache:css              delete css cache files
     core:cache:js               delete js cache files
+    
+    core:db:install             install database
+                                Be aware that the config.php file will be overwritten!
 
 HELP;
         print $help."\n";
