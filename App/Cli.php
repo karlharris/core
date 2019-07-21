@@ -5,6 +5,12 @@
 
 namespace App;
 
+use Exception;
+use PDO;
+use PDOException;
+
+use function logger;
+
 if(PHP_SAPI !== 'cli')
 {
     header('Content-type: text/html; charset=utf-8', true, 503);
@@ -68,6 +74,82 @@ class Cli
     private function cacheJs()
     {
         utilities()->deleteInDirectory(CP.'js');
+    }
+
+    /**
+     * install db
+     */
+    private function dbInstall()
+    {
+        $requirements = [
+            'Host: ',
+            'User: ',
+            'Database name: ',
+            'Password: '
+        ];
+        echo 'Are you aware that the config.php file will be overwritten? Type "yes" if you wish to continue: ';
+        $handle = fopen ("php://stdin","r");
+        $line = trim(fgets($handle));
+        if('yes' !== $line)
+        {
+            echo "\n".'Aborting.'."\n\n";
+            die;
+        }
+        $data = [];
+        foreach($requirements as $requirement)
+        {
+            echo $requirement;
+            $handle = fopen ("php://stdin","r");
+            $line = trim(fgets($handle));
+            if('' === $line)
+            {
+                echo "\n".'No valid input - aborting'."\n\n";
+                die;
+            } else {
+                $data[] = $line;
+            }
+        }
+        if(4 === count($data))
+        {
+            try
+            {
+                $connection = new PDO(
+                    'mysql:dbname='.$data[2].';host='.$data[0],
+                    $data[1],
+                    $data[3]
+                );
+                if(!$connection instanceof PDO)
+                {
+                    echo 'No valid database connection';
+                    return \false;
+                }
+            } catch(PDOException $e)
+            {
+                echo 'Could not establish database connection.'."\n".$e->getMessage()."\n".'Check your data and try again.'."\n";
+                return \false;
+            }
+            $configContent = <<<CONTENT
+<?php
+
+return [
+    'db' => [
+        'host' => '$data[0]',
+        'user' => '$data[1]',
+        'name' => '$data[2]',
+        'pass' => '$data[3]'
+    ]
+];
+CONTENT;
+            try
+            {
+                file_put_contents(BP.'config.php', $configContent);
+            } catch(Exception $e)
+            {
+                echo 'Could not write database config.'."\n".$e->getMessage()."\n".'Check user rights and owner of config.php file and try again.'."\n";
+            }
+        }
+        echo "\n".'Database installed.'."\n";
+        return \true;
     }
 
     /**

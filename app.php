@@ -19,7 +19,7 @@ if(!require_once('App/Autoloader.php'))
 if(!stream_resolve_include_path('App/INSTALL_LOCK'))
 {
     echo '<h2>Warning</h2>';
-    echo 'karlharris/core have to be installed to use database storage - run "php App/cli.php -install".<br>Or, if you just want to use templates and stuff create an "INSTALL_LOCK" file in the App directory to suppress this warning.';
+    echo 'karlharris/core have to be installed to use database storage - run "php App/Cli.php core:db:install".<br>Or, if you just want to use templates and stuff create an "INSTALL_LOCK" file in the App directory to suppress this warning.';
     echo '<h2>Warnung</h2>';
-    echo 'karlharris/core muss installiert sein um Datenbank-Funktionalitäten zu nutzen - führen Sie "php App/cli.php -install" aus.<br>Oder, wenn Sie nur templates etc nutzen möchten, erstellen Sie eine Datei mit dem Namen "INSTALL_LOCK" im App Verzeichnis, um diese Warnung zu umgehen.';
+    echo 'karlharris/core muss installiert sein um Datenbank-Funktionalitäten zu nutzen - führen Sie "php App/Cli.php core:db:install" aus.<br>Oder, wenn Sie nur templates etc nutzen möchten, erstellen Sie eine Datei mit dem Namen "INSTALL_LOCK" im App Verzeichnis, um diese Warnung zu umgehen.';
 }

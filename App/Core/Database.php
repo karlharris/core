@@ -16,9 +16,9 @@ use function logger;
 class Database
 {
     /**
-     * @var array
+     * @var bool|array
      */
-    private $dbConfig = [];
+    private $dbConfig = \false;
 
     /**
      * Database constructor.
@@ -44,11 +44,11 @@ class Database
                 $this->dbConfig['user'],
                 $this->dbConfig['pass']
             );
-            return ($connection instanceof PDO ? $connection : false);
+            return ($connection instanceof PDO ? $connection : \false);
         } catch(\PDOException $e)
         {
             logger()->log('Could not establish database connection -> '.$e->getMessage());
-            return false;
+            return \false;
         }
     }
 
@@ -57,6 +57,10 @@ class Database
      */
     public function getDb()
     {
+        if(!$this->dbConfig)
+        {
+            return \false;
+        }
         return $this->createConnection();
     }
 }
