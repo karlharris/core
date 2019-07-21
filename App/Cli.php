@@ -79,26 +79,28 @@ class Cli
      */
     private function dbInstall()
     {
-        $requirements = [
-            'Host: ',
-            'User: ',
-            'Database name: ',
-            'Password: '
-        ];
         echo 'Are you aware that the config.php file will be overwritten? Type "yes" if you wish to continue: ';
-        $handle = fopen ("php://stdin","r");
+        $handle = fopen("php://stdin","r");
         $line = trim(fgets($handle));
+        if(!fclose($handle))
+        {
+            echo "\n".'WARNING: Could not close file handle.'."\n";
+        }
         if('yes' !== $line)
         {
             echo "\n".'Aborting.'."\n\n";
             die;
         }
         $data = [];
-        foreach($requirements as $requirement)
+        foreach(['Host: ','User: ','Database name: ','Password: '] as $requirement)
         {
             echo $requirement;
-            $handle = fopen ("php://stdin","r");
+            $handle = fopen("php://stdin","r");
             $line = trim(fgets($handle));
+            if(!fclose($handle))
+            {
+                echo "\n".'WARNING: Could not close file handle.'."\n";
+            }
             if('' === $line)
             {
                 echo "\n".'No valid input - aborting'."\n\n";
