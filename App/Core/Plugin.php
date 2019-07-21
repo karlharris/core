@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019. karlharris.org
+ * Copyright (c) 2018 - 2019. karlharris.org
  */
 
 namespace App\Core;
@@ -40,7 +40,7 @@ class Plugin
             $this->defaultConfig = require_once(BP.'App/default_plugin_config.php');
             foreach($this->composer->getClassMap() as $className => $file)
             {
-                if(strpos($className, 'App\Plugins\\') !== \false)
+                if(\false !== strpos($className, 'App\Plugins\\'))
                 {
                     $classPath = explode('\\', $className);
                     if(!isset($classPath[4]) && $classPath[2] === $classPath[3])
@@ -61,9 +61,6 @@ class Plugin
                     }
                 }
             }
-            echo '<pre>';
-            var_dump($this->plugins);
-            echo '</pre>';
         }
     }
 

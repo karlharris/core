@@ -1,9 +1,13 @@
 <?php
 /**
- * Copyright (c) 2019. karlharris.org
+ * Copyright (c) 2018 - 2019. karlharris.org
  */
 
 namespace App\Core;
+
+use Exception;
+
+use function logger;
 
 /**
  * Class Utilities
@@ -96,5 +100,72 @@ class Utilities
     public function isValidFilename($file)
     {
         return preg_match('/^([-\.\w]+)$/', $file) > 0;
+    }
+
+    /**
+     * @param string $basePath
+     */
+    public function deleteInDirectory($basePath)
+    {
+        $dirHandle = opendir($basePath);
+        if(is_resource($dirHandle))
+        {
+            while(false !== ($entry = readdir($dirHandle)))
+            {
+                if($entry != '.' && $entry != '..')
+                {
+                    if(is_file($basePath.$entry))
+                    {
+                        try
+                        {
+                            unlink($basePath.$entry);
+                        } catch(Exception $e) {
+                            logger()->log('Could not unlink file -> '.$basePath.$entry.PHP_EOL.$e->getMessage());
+                        }
+                    } elseif(is_dir($basePath.$entry))
+                    {
+                        $this->deleteFiles($entry, $basePath);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $dir
+     * @param bool|string $basePath
+     */
+    public function deleteFiles($dir, $basePath = false)
+    {
+        $basePath = ($basePath ? $basePath : '').$dir.DS;
+        $dirHandle = opendir($basePath);
+        if(is_resource($dirHandle))
+        {
+            while(false !== ($entry = readdir($dirHandle)))
+            {
+                if($entry != '.' && $entry != '..')
+                {
+                    if(is_file($basePath.$entry))
+                    {
+                        try
+                        {
+                            unlink($basePath.$entry);
+                        } catch(Exception $e) {
+                            logger()->log('Could not unlink file -> '.$basePath.$entry.PHP_EOL.$e->getMessage());
+                        }
+                    } elseif(is_dir($basePath.$entry))
+                    {
+                        $this->deleteFiles($entry, $basePath);
+                    }
+                }
+            }
+            try
+            {
+                rmdir($basePath);
+            } catch (Exception $e)
+            {
+                logger()->log('Could not delete directory -> '.$basePath.PHP_EOL.$e->getMessage());
+            }
+        }
     }
 }

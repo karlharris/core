@@ -1,9 +1,11 @@
 <?php
 /**
- * Copyright (c) 2019. karlharris.org
+ * Copyright (c) 2018 - 2019. karlharris.org
  */
 
 namespace App\Core;
+
+use Exception;
 
 use function config;
 use function router;
@@ -77,6 +79,11 @@ class Theme
      */
     public function __construct()
     {
+        echo '';
+        if(PHP_SAPI === 'cli')
+        {
+            $this->noRender = \true;
+        }
         $this->theme = config()['theme'];
     }
 
@@ -198,13 +205,18 @@ class Theme
      */
     public function loadResources()
     {
-        $resourcePath = strtolower(str_replace(['App\Controllers\\', '\\'], ['', '/'], router()->getControllerClass()).DS.router()->getActionName());
-        $this->minCssFile = CP.'css'.$resourcePath.'.css';
-        $this->minJsFile = CP.'js'.$resourcePath.'.js';
-        if(!$this->preDispatch() || $this->noRender)
+        if($this->noRender || !$this->preDispatch())
         {
             return;
         }
+        $resourcePath = strtolower(str_replace(['App\Controllers\\', '\\'], ['', '/'], router()->getControllerClass()).DS.router()->getActionName());
+        /** prevent resource processing, when a file is called that not exists */
+        if(\false !== strpos($resourcePath, 'app/controller'))
+        {
+            router()->redirect('404', '404');
+        }
+        $this->minCssFile = CP.'css'.$resourcePath.'.css';
+        $this->minJsFile = CP.'js'.$resourcePath.'.js';
         if(config()['debug'])
         {
             $this->setResource($this->less, [
@@ -248,7 +260,7 @@ class Theme
                 }
                 utilities()->mkd(str_replace('/'.basename($this->minJsFile), '', $this->minJsFile), 0777);
                 file_put_contents($this->minJsFile, $minifiedJs);
-            } catch(\Exception $e) {
+            } catch(Exception $e) {
                 logger()->log('failed to minify js files -> '.$e->getMessage());
             }
         }
@@ -266,7 +278,7 @@ class Theme
             utilities()->sortArrayByValue($this->less);
             try
             {
-                $parser = new \Less_Parser(['compress'=>true]);
+                $parser = new \Less_Parser(['compress'=>\true]);
                 foreach($this->less as $files)
                 {
                     foreach($files['files'] as $file)
@@ -276,7 +288,7 @@ class Theme
                 }
                 utilities()->mkd(str_replace('/'.basename($this->minCssFile), '', $this->minCssFile), 0777);
                 file_put_contents($this->minCssFile, $parser->getCss());
-            } catch(\Exception $e) {
+            } catch(Exception $e) {
                 logger()->log('failed to parse less files -> '.$e->getMessage());
             }
         }
@@ -402,7 +414,7 @@ class Theme
      * @param bool $echo
      * @return bool|string
      */
-    private function renderPhtml($file, $echo = false)
+    private function renderPhtml($file, $echo = \false)
     {
         $output = '';
         ob_start();

@@ -1,20 +1,21 @@
 <?php
 /**
- * Copyright (c) 2019. karlharris.org
+ * Copyright (c) 2018 - 2019. karlharris.org
  */
 
 return [
     'registeredControllers' => [
-        '404'
+        '404',
+        'lvl1' => [
+            'lvl2'
+        ]
     ],
     'debug' => \false,
     'loggerEmail' => '',
     'show_errors' => \true,
     'timezone' => 'Europe/Berlin',
     'theme' => 'default',
-    'inheritTheme' => [
-        'test'
-    ],
+    'inheritTheme' => [],
     'js' => [
         'internal' => [
             [

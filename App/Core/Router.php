@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019. karlharris.org
+ * Copyright (c) 2018 - 2019. karlharris.org
  */
 
 namespace App\Core;
@@ -217,7 +217,7 @@ class Router
         $lastLevel = array_pop($paths);
         if(empty($paths))
         {
-            return array_key_exists($lastLevel, $controllers) || in_array($lastLevel, $controllers);
+            return in_array($lastLevel, $controllers) || array_key_exists($lastLevel, $controllers);
         }
         foreach($paths as $path)
         {
@@ -231,7 +231,7 @@ class Router
                 return \false;
             }
         }
-        return array_key_exists($lastLevel, $controllers) || in_array($lastLevel, $controllers);
+        return in_array($lastLevel, $controllers) || array_key_exists($lastLevel, $controllers);
     }
 
     /**
@@ -241,7 +241,7 @@ class Router
     public function isPath($pattern)
     {
         $flippedPath = array_flip($this->getPathParams());
-        if(strpos($pattern, '/') !== \false)
+        if(\false !== strpos($pattern, '/'))
         {
             $pathArray = explode('/', $pattern);
             foreach($pathArray as $key => $path)

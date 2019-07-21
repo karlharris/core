@@ -1,7 +1,14 @@
 <?php
 /**
- * Copyright (c) 2019. karlharris.org
+ * Copyright (c) 2018 - 2019. karlharris.org
  */
+
+use App\Core\Database;
+use App\Core\Logger;
+use App\Core\Plugin;
+use App\Core\Router;
+use App\Core\Theme;
+use App\Core\Utilities;
 
 /**
  * shorter directory separator
@@ -63,86 +70,85 @@ function config()
 }
 
 /**
- * @return \App\Core\Utilities
+ * @return Utilities
  */
 function utilities()
 {
     static $utilities;
-    if(!$utilities instanceOf \App\Core\Utilities)
+    if(!$utilities instanceOf Utilities)
     {
-        $utilities = new \App\Core\Utilities();
+        $utilities = new Utilities();
     }
     return $utilities;
 }
 
 /**
- * @return \App\Core\Logger
+ * @return Logger
  */
 function logger()
 {
     static $log;
-    if(!$log instanceOf \App\Core\Logger)
+    if(!$log instanceOf Logger)
     {
-        $log = new \App\Core\Logger();
+        $log = new Logger();
     }
     return $log;
 }
 
 /**
- * @return \App\Core\Router
+ * @return Router
  */
 function router()
 {
     static $router;
-    if(!$router instanceOf \App\Core\Router)
+    if(!$router instanceOf Router)
     {
-        $router = new \App\Core\Router();
+        $router = new Router();
     }
     return $router;
 }
 
 /**
  * @param bool|object $composer
- * @return \App\Core\Plugin
+ * @return Plugin
  */
 function plugin($composer = false)
 {
     static $plugin;
-    if(!$plugin instanceOf \App\Core\Plugin)
+    if(!$plugin instanceOf Plugin)
     {
-        $plugin = new \App\Core\Plugin($composer);
+        $plugin = new Plugin($composer);
     }
     return $plugin;
 }
 
 /**
- * @return \App\Core\Theme
+ * @return Theme
  */
 function theme()
 {
     static $theme;
-    if(!$theme instanceOf \App\Core\Theme)
+    if(!$theme instanceOf Theme)
     {
-        $theme = new \App\Core\Theme();
+        $theme = new Theme();
     }
     return $theme;
 }
 
 /**
- * @return bool|\PDO
+ * @return bool|PDO
  */
 function db()
 {
     static $db;
-    if(!$db instanceof \PDO)
+    if(!$db instanceof PDO)
     {
-        $db = new \App\Core\Database();
+        $db = new Database();
         $db = $db->getDb();
     }
     return $db;
 }
 
-utilities();
 logger();
 config();
 db();

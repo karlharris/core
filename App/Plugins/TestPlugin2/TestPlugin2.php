@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019. karlharris.org
+ * Copyright (c) 2018 - 2019. karlharris.org
  */
 
 namespace App\Plugins\TestPlugin2;
