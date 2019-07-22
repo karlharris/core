@@ -91,19 +91,12 @@ class Cli
             return \false;
         }
         $this->checkAndSetOldConfig();
-        $data = [];
-        foreach(['Host: ','User: ','Database name: ','Password: '] as $requirement)
-        {
-            echo $requirement;
-            $line = $this->readInputLine();
-            if('' === $line)
-            {
-                echo "\n".'No valid input - aborting'."\n\n";
-                die;
-            } else {
-                $data[] = $line;
-            }
-        }
+        $data = $this->getUserInfo([
+            'Host: ',
+            'User: ',
+            'Database name: ',
+            'Password: '
+        ]);
         if(4 === count($data))
         {
             try
@@ -161,7 +154,7 @@ CONTENT;
         if(stream_resolve_include_path(BP.'config.php'))
         {
             $this->oldConfig = file_get_contents(BP.'config.php');
-            echo "\n".'Old data found.'."\n";
+            echo "\n".'Old data found.'."\n\n";
         }
     }
 
@@ -180,12 +173,37 @@ CONTENT;
             try
             {
                 file_put_contents(BP.'old_config_'.$i.'.php', $this->oldConfig);
-                echo "\n".'Written old data to file "'.BP.'old_config_'.$i.'.php".'."\n";
+                echo "\n".'Written old data to file "'.BP.'old_config_'.$i.'.php".'."\n\n";
             } catch(Exception $e)
             {
-                echo "\n".'Could not write copy of old config.php ('.BP.'old_config_'.$i.'.php).'."\n".$e->getMessage()."\n".'Check user rights and owner of root directory.'."\n";
+                echo "\n".'Could not write copy of old config.php ('.BP.'old_config_'.$i.'.php).'."\n".$e->getMessage()."\n".'Check user rights and owner of root directory.'."\n\n";
             }
         }
+    }
+
+    /**
+     * @param array $questions
+     * @return array
+     */
+    private function getUserInfo($questions = [])
+    {
+        $answers = [];
+        if(isset($questions[0]))
+        {
+            foreach($questions as $question)
+            {
+                echo $question;
+                $line = $this->readInputLine();
+                if('' === $line)
+                {
+                    echo "\n".'No valid input - aborting'."\n\n";
+                    die;
+                } else {
+                    $answers[] = $line;
+                }
+            }
+        }
+        return $answers;
     }
 
     /**
