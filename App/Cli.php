@@ -9,7 +9,7 @@ use Exception;
 use PDO;
 use PDOException;
 
-if(PHP_SAPI !== 'cli')
+if('cli' !== PHP_SAPI)
 {
     header('Content-type: text/html; charset=utf-8', true, 503);
     echo '<h2>Error</h2>';
@@ -79,7 +79,7 @@ class Cli
      */
     private function dbInstall()
     {
-        echo 'Are you aware that the config.php file will be overwritten? Type "yes" if you wish to continue: ';
+        echo "\n".'Are you aware that the config.php file will be overwritten? Type "yes" if you wish to continue: ';
         $handle = fopen("php://stdin","r");
         $line = trim(fgets($handle));
         if(!fclose($handle))
@@ -89,7 +89,12 @@ class Cli
         if('yes' !== $line)
         {
             echo "\n".'Aborting.'."\n\n";
-            die;
+            return \false;
+        }
+        if(stream_resolve_include_path(BP.'config.php'))
+        {
+            $oldConfig = file_get_contents(BP.'config.php');
+            echo "\n".'Old data found.'."\n";
         }
         $data = [];
         foreach(['Host: ','User: ','Database name: ','Password: '] as $requirement)
@@ -120,12 +125,12 @@ class Cli
                 );
                 if(!$connection instanceof PDO)
                 {
-                    echo 'No valid database connection';
+                    echo "\n".'No valid database connection'."\n";
                     return \false;
                 }
             } catch(PDOException $e)
             {
-                echo 'Could not establish database connection.'."\n".$e->getMessage()."\n".'Check your data and try again.'."\n";
+                echo "\n".'Could not establish database connection.'."\n".$e->getMessage()."\n".'Check your data and try again.'."\n";
                 return \false;
             }
             $configContent = <<<CONTENT
@@ -145,11 +150,32 @@ CONTENT;
                 file_put_contents(BP.'config.php', $configContent);
             } catch(Exception $e)
             {
-                echo 'Could not write database config.'."\n".$e->getMessage()."\n".'Check user rights and owner of config.php file and try again.'."\n";
+                echo "\n".'Could not write database config.'."\n".$e->getMessage()."\n".'Check user rights and owner of config.php file and try again.'."\n";
+                return \false;
             }
+            echo "\n".'Database installed.'."\n";
+            if(isset($oldConfig))
+            {
+                $i = 1;
+                while(stream_resolve_include_path(BP.'old_config_'.$i.'.php'))
+                {
+                    $i++;
+                }
+                try
+                {
+                    file_put_contents(BP.'old_config_'.$i.'.php', $oldConfig);
+                    echo "\n".'Written old data to file "'.BP.'old_config_'.$i.'.php".'."\n";
+                } catch(Exception $e)
+                {
+                    echo "\n".'Could not write copy of old config.php ('.BP.'old_config_'.$i.'.php).'."\n".$e->getMessage()."\n".'Check user rights and owner of root directory.'."\n";
+                    return \false;
+                }
+            }
+            return \true;
+        } else {
+            echo "\n".'Not enough parameters.'."\n";
         }
-        echo "\n".'Database installed.'."\n";
-        return \true;
+        return \false;
     }
 
     /**
