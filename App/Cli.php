@@ -29,6 +29,11 @@ if(!require_once('App/Autoloader.php'))
 class Cli
 {
     /**
+     * @var string
+     */
+    private $oldConfig = '';
+
+    /**
      * Cli constructor.
      */
     public function __construct()
@@ -80,32 +85,17 @@ class Cli
     private function dbInstall()
     {
         echo "\n".'Are you aware that the config.php file will be overwritten? Type "yes" if you wish to continue: ';
-        $handle = fopen("php://stdin","r");
-        $line = trim(fgets($handle));
-        if(!fclose($handle))
-        {
-            echo "\n".'WARNING: Could not close file handle.'."\n";
-        }
-        if('yes' !== $line)
+        if('yes' !== $this->readInputLine())
         {
             echo "\n".'Aborting.'."\n\n";
             return \false;
         }
-        if(stream_resolve_include_path(BP.'config.php'))
-        {
-            $oldConfig = file_get_contents(BP.'config.php');
-            echo "\n".'Old data found.'."\n";
-        }
+        $this->checkAndSetOldConfig();
         $data = [];
         foreach(['Host: ','User: ','Database name: ','Password: '] as $requirement)
         {
             echo $requirement;
-            $handle = fopen("php://stdin","r");
-            $line = trim(fgets($handle));
-            if(!fclose($handle))
-            {
-                echo "\n".'WARNING: Could not close file handle.'."\n";
-            }
+            $line = $this->readInputLine();
             if('' === $line)
             {
                 echo "\n".'No valid input - aborting'."\n\n";
@@ -154,28 +144,62 @@ CONTENT;
                 return \false;
             }
             echo "\n".'Database installed.'."\n";
-            if(isset($oldConfig))
-            {
-                $i = 1;
-                while(stream_resolve_include_path(BP.'old_config_'.$i.'.php'))
-                {
-                    $i++;
-                }
-                try
-                {
-                    file_put_contents(BP.'old_config_'.$i.'.php', $oldConfig);
-                    echo "\n".'Written old data to file "'.BP.'old_config_'.$i.'.php".'."\n";
-                } catch(Exception $e)
-                {
-                    echo "\n".'Could not write copy of old config.php ('.BP.'old_config_'.$i.'.php).'."\n".$e->getMessage()."\n".'Check user rights and owner of root directory.'."\n";
-                    return \false;
-                }
-            }
+            $this->writeOldConfig();
             return \true;
         } else {
             echo "\n".'Not enough parameters.'."\n";
         }
         return \false;
+    }
+
+    /**
+     * check if config.php exists
+     * read file if it does
+     */
+    private function checkAndSetOldConfig()
+    {
+        if(stream_resolve_include_path(BP.'config.php'))
+        {
+            $this->oldConfig = file_get_contents(BP.'config.php');
+            echo "\n".'Old data found.'."\n";
+        }
+    }
+
+    /**
+     * write backup file if there is old data
+     */
+    private function writeOldConfig()
+    {
+        if('' !== $this->oldConfig)
+        {
+            $i = 1;
+            while(stream_resolve_include_path(BP.'old_config_'.$i.'.php'))
+            {
+                $i++;
+            }
+            try
+            {
+                file_put_contents(BP.'old_config_'.$i.'.php', $this->oldConfig);
+                echo "\n".'Written old data to file "'.BP.'old_config_'.$i.'.php".'."\n";
+            } catch(Exception $e)
+            {
+                echo "\n".'Could not write copy of old config.php ('.BP.'old_config_'.$i.'.php).'."\n".$e->getMessage()."\n".'Check user rights and owner of root directory.'."\n";
+            }
+        }
+    }
+
+    /**
+     * @return string
+     */
+    private function readInputLine()
+    {
+        $handle = fopen("php://stdin","r");
+        $line = trim(fgets($handle));
+        if(!fclose($handle))
+        {
+            echo "\n".'WARNING: Could not close file handle.'."\n";
+        }
+        return $line;
     }
 
     /**
