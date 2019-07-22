@@ -91,7 +91,7 @@ class Cli
             return \false;
         }
         $this->checkAndSetOldConfig();
-        $data = $this->getUserInfo([
+        $data = $this->getUserInput([
             'Host: ',
             'User: ',
             'Database name: ',
@@ -185,7 +185,7 @@ CONTENT;
      * @param array $questions
      * @return array
      */
-    private function getUserInfo($questions = [])
+    private function getUserInput($questions = [])
     {
         $answers = [];
         if(isset($questions[0]))
