@@ -4,4 +4,4 @@ under construction
 
 ## install current (alpha) state
 
-`composer create-project karlharris/core`
+via cli: `composer create-project karlharris/core`
