@@ -37,7 +37,7 @@ defined('CP') ?: define('CP', BP.'var'.DS.'cache'.DS);
 /**
  * plugin path
  */
-defined('PP') ?: define('PP', BP.'App'.DS.'Plugins'.DS);
+defined('PP') ?: define('PP', BP.'Plugins'.DS);
 
 $composer = require_once(BP.'vendor/autoload.php');
 
@@ -59,7 +59,7 @@ function config()
         {
             unset($config['db']);
         }
-        if($config['show_errors'])
+        if($config['showErrors'])
         {
             error_reporting(E_ALL);
             ini_set('display_errors', 1);

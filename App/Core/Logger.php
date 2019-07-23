@@ -83,7 +83,7 @@ class Logger
         $options = array_merge($this->defaultOptions, $options);
         $mode = ($options['mode'] === '' ? $this->mode : $options['mode']);
         ob_start();
-        echo "\n[".date('Y-m-d H:i:s')."] [".$options['type']."]\n";
+        echo "\n[".date('Y-m-d H:i:s')."] [".$options['type']."] [IP: ".$_SERVER['REMOTE_ADDR']."]\n";
         echo $message."\n";
         if($options['backtrace'])
         {

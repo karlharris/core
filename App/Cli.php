@@ -125,7 +125,8 @@ return [
         'user' => '$data[1]',
         'name' => '$data[2]',
         'pass' => '$data[3]'
-    ]
+    ],
+    'databaseLock' => \\true
 ];
 CONTENT;
             try

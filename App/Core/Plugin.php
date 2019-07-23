@@ -37,7 +37,7 @@ class Plugin
         if($composer)
         {
             $this->composer = $composer;
-            $this->defaultConfig = require_once(BP.'App/default_plugin_config.php');
+            $this->defaultConfig = require_once(BP.'Plugins/default_config.php');
             foreach($this->composer->getClassMap() as $className => $file)
             {
                 if(\false !== strpos($className, 'App\Plugins\\'))
@@ -55,12 +55,15 @@ class Plugin
                         if(is_subclass_of($plugin['object'], 'App\Core\Plugin') && $plugin['config']['active'])
                         {
                             $this->plugins[$className] = $plugin;
-                        } else {
+                        } elseif(config()['debug']) {
                             logger()->log($className.' is deactivated or not extending the Plugin class (App\Core\Plugin)');
                         }
                     }
                 }
             }
+            echo '----------------------------------------<br><pre>';
+            print_r($this->composer->getClassMap());
+            echo '<pre>----------------------------------------<br>';
         }
     }
 

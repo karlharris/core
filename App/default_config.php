@@ -12,7 +12,7 @@ return [
     ],
     'debug' => \false,
     'loggerEmail' => '',
-    'show_errors' => \true,
+    'showErrors' => \true,
     'timezone' => 'Europe/Berlin',
     'theme' => 'default',
     'inheritTheme' => [],
@@ -41,5 +41,6 @@ return [
     'cache' => [
         'less' => \false,
         'js' => \false
-    ]
+    ],
+    'databaseLock' => \false
 ];
