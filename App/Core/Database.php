@@ -25,6 +25,10 @@ class Database
      */
     public function __construct()
     {
+        if(!stream_resolve_include_path(BP.'config.php'))
+        {
+            return \false;
+        }
         $config = require(BP.'config.php');
         if(isset($config['db']))
         {
