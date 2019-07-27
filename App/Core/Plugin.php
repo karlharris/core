@@ -40,10 +40,10 @@ class Plugin
             $this->defaultConfig = require_once(BP.'Plugins/default_config.php');
             foreach($this->composer->getClassMap() as $className => $file)
             {
-                if(\false !== strpos($className, 'App\Plugins\\'))
+                if(\false !== strpos($className, 'Plugins\\'))
                 {
                     $classPath = explode('\\', $className);
-                    if(!isset($classPath[4]) && $classPath[2] === $classPath[3])
+                    if(!isset($classPath[3]) && $classPath[1] === $classPath[2])
                     {
                         $plugin['object'] = new $className();
                         if(stream_resolve_include_path(PP.$classPath[2].DS.'config.php'))
@@ -61,9 +61,6 @@ class Plugin
                     }
                 }
             }
-            echo '----------------------------------------<br><pre>';
-            print_r($this->composer->getClassMap());
-            echo '<pre>----------------------------------------<br>';
         }
     }
 

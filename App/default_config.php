@@ -15,7 +15,9 @@ return [
     'showErrors' => \true,
     'timezone' => 'Europe/Berlin',
     'theme' => 'default',
-    'inheritTheme' => [],
+    'inheritTheme' => [
+        'testTheme'
+    ],
     'js' => [
         'internal' => [
             [

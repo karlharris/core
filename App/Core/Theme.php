@@ -213,7 +213,10 @@ class Theme
         /** prevent resource processing, when a file is called that not exists */
         if(\false !== strpos($resourcePath, 'app/controller'))
         {
-            router()->redirect('404', '404');
+            echo '----------------------------------------<br><pre>';
+//            var_dump(strpos($resourcePath, 'app/controller'));
+            echo '<pre>----------------------------------------<br>';
+//            router()->redirect('404', '404');
         }
         $this->minCssFile = CP.'css'.$resourcePath.'.css';
         $this->minJsFile = CP.'js'.$resourcePath.'.js';
@@ -300,7 +303,7 @@ class Theme
     private function collectTemplates()
     {
         $parts = explode('\\', str_replace('\\app\controllers\\', '', strtolower(router()->getControllerClass())));
-        $parts[] = router()->getActionName();
+//        $parts[] = router()->getActionName();
         $paths = $used = [];
         $sort = -1;
         foreach($parts as $part)
@@ -308,19 +311,50 @@ class Theme
             $paths[] = 'frontend'.DS.(isset($used[0]) ? implode(DS, $used).DS : '').$part.DS;
             $used[] = $part;
         }
+        echo '----------------------------------------<br><pre>';
+        print_r('controllerName -> '.router()->getControllerClass().'<br>');
+        print_r('actionName -> '.router()->getActionName().'<br>');
+        print_r($parts);
+        print_r($paths);
+        echo '<pre>----------------------------------------<br>';
         foreach(array_reverse($paths) as $path)
         {
-            if($check = $this->getPaths($path.'head.phtml', \true))
+            if($check = $this->getPaths($path.'head.phtml', \false, \true))
             {
-                $this->templates[] = $check['file'];
+                if(isset($check[0]))
+                {
+                    foreach($check as $template)
+                    {
+                        $this->templates[] = $template['file'];
+                    }
+                } else {
+                    $this->templates[] = $check['file'];
+                }
+
             }
-            if($check = $this->getPaths($path.'index.phtml', \true))
+            if($check = $this->getPaths($path.router()->getActionName().'.phtml', \false, \true))
             {
-                $this->templates[] = $check['file'];
+                if(isset($check[0]))
+                {
+                    foreach($check as $template)
+                    {
+                        $this->templates[] = $template['file'];
+                    }
+                } else {
+                    $this->templates[] = $check['file'];
+                }
             }
-            if($check = $this->getPaths($path.'foot.phtml', \true))
+            if($check = $this->getPaths($path.'foot.phtml', \false, \true))
             {
-                $this->templates[] = $check['file'];
+                if(isset($check[0]))
+                {
+                    foreach($check as $template)
+                    {
+                        $this->templates[] = $template['file'];
+                    }
+                } else {
+                    $this->templates[] = $check['file'];
+                }
             }
             $sort++;
         }
@@ -372,11 +406,16 @@ class Theme
     /**
      * @param $path
      * @param bool $override
+     * @param bool $debug
      * @return bool|array
      */
-    private function getPaths($path, $override = \false)
+    private function getPaths($path, $override = \false, $debug = \false)
     {
         $return = [];
+        if($debug)
+        {
+            echo TP.config()['theme'].DS.$path.'<br>';
+        }
         if(stream_resolve_include_path(TP.config()['theme'].DS.$path))
         {
             $return[] = [
@@ -388,6 +427,10 @@ class Theme
         {
             foreach(array_reverse(config()['inheritTheme']) as $index => $theme)
             {
+                if($debug)
+                {
+                    echo TP.$theme.DS.$path.'<br>';
+                }
                 if(stream_resolve_include_path(TP.$theme.DS.$path))
                 {
                     $return[] = [

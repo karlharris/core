@@ -51,7 +51,12 @@ function config()
     {
         try
         {
-            $config = array_merge(require(BP.'App/default_config.php'), require(BP.'config.php'));
+            if(stream_resolve_include_path(BP.'config.php'))
+            {
+                $config = array_merge(require(BP.'App/default_config.php'), require(BP.'config.php'));
+            } else {
+                $config = require(BP.'App/default_config.php');
+            }
         } catch(\Exception $e) {
             logger()->log('config() -> '.$e->getMessage());
         }
