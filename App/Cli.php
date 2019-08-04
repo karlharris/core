@@ -80,6 +80,14 @@ class Cli
     }
 
     /**
+     * delete html cache files
+     */
+    private function cacheHtml()
+    {
+        utilities()->deleteInDirectory(CP.'html');
+    }
+
+    /**
      * install db
      */
     private function dbInstall()
@@ -240,6 +248,7 @@ CONTENT;
     core:cache:clear            delete all cache files
     core:cache:css              delete css cache files
     core:cache:js               delete js cache files
+    core:cache:html             delete html cache files
     
     core:db:install             install database
                                 Be aware that the config.php file will be overwritten!

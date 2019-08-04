@@ -162,9 +162,8 @@ class Router
                 if(!isset($path[$index+1]))
                 {
                     $this->actionName = strtolower($part);
-                } else {
-                    $this->controllerClass .= '\\'.ucfirst(strtolower($part));
                 }
+                $this->controllerClass .= '\\'.ucfirst(strtolower($part));
             }
         } else {
             $this->controllerClass .= '\\Index';

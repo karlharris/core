@@ -10,7 +10,14 @@ return [
             'lvl2'
         ]
     ],
-    'debug' => \false,
+    'debug' => [
+        'theme' => [
+            'template' => \false,
+            'resource' => \false
+        ],
+        'pathInfo' => \false,
+        'plugin' => \false
+    ],
     'loggerEmail' => '',
     'showErrors' => \true,
     'timezone' => 'Europe/Berlin',
@@ -42,7 +49,8 @@ return [
     ],
     'cache' => [
         'less' => \false,
-        'js' => \false
+        'js' => \false,
+        'html' => \false
     ],
-    'databaseLock' => \false
+    'databaseLock' => \true
 ];

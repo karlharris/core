@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <link rel="dns-prefetch" href="//karlharris.org">
+    <link rel="dns-prefetch" href="//<?php echo $_SERVER['HTTP_HOST']; ?>">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="robots" content="noindex, nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <?php
-    if(file_exists(theme()->getMinCssFile()))
+    if(stream_resolve_include_path(theme()->getMinCssFile()))
     {
         echo '<style>'.file_get_contents(theme()->getMinCssFile()).'</style>';
     }
     ?>
 </head>
 <body class="ctl<?php echo str_replace(['\\app\controllers','\\'], ['','-'], strtolower(router()->getControllerClass())).' act-'.router()->getActionName(); ?>">
-<main>

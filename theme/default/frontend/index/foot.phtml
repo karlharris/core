@@ -1,6 +1,5 @@
-</main>
 <?php
-if(file_exists(theme()->getMinJsFile()))
+if(stream_resolve_include_path(theme()->getMinJsFile()))
 {
     echo '<script>'.file_get_contents(theme()->getMinJsFile()).'</script>';
 }

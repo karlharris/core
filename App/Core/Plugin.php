@@ -55,7 +55,7 @@ class Plugin
                         if(is_subclass_of($plugin['object'], 'App\Core\Plugin') && $plugin['config']['active'])
                         {
                             $this->plugins[$className] = $plugin;
-                        } elseif(config()['debug']) {
+                        } elseif(config()['debug']['plugin']) {
                             logger()->log($className.' is deactivated or not extending the Plugin class (App\Core\Plugin)');
                         }
                     }

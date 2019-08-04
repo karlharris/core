@@ -154,6 +154,21 @@ function db()
     return $db;
 }
 
+/**
+ * @param $str
+ * @param bool $return
+ * @return string|void
+ */
+function __($str, $return = \false)
+{
+    if(\false === $return)
+    {
+        echo $str;
+    } else {
+        return $str;
+    }
+}
+
 logger();
 config();
 db();

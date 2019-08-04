@@ -70,6 +70,11 @@ class Theme
     private $minJsFile = '';
 
     /**
+     * @var string
+     */
+    private $minThemeFile = '';
+
+    /**
      * @var array
      */
     private $templates = [];
@@ -213,14 +218,26 @@ class Theme
         /** prevent resource processing, when a file is called that not exists */
         if(\false !== strpos($resourcePath, 'app/controller'))
         {
-            echo '----------------------------------------<br><pre>';
-//            var_dump(strpos($resourcePath, 'app/controller'));
-            echo '<pre>----------------------------------------<br>';
-//            router()->redirect('404', '404');
+            router()->redirect('404', '404');
+        }
+        $minThemeFile = CP.'html'.$resourcePath.'.csf';
+        $hash = md5($minThemeFile);
+        $this->minThemeFile = str_replace(basename($minThemeFile),$hash.'.csf',$minThemeFile);
+        if(config()['cache']['html'] && stream_resolve_include_path($this->minThemeFile))
+        {
+            echo file_get_contents($this->minThemeFile);
+            $cacheId = $hash;
+            echo <<<CACHEID
+
+<!--
+  -- cache id: $cacheId
+  -->
+CACHEID;
+            exit;
         }
         $this->minCssFile = CP.'css'.$resourcePath.'.css';
         $this->minJsFile = CP.'js'.$resourcePath.'.js';
-        if(config()['debug'])
+        if(config()['debug']['pathInfo'])
         {
             $this->setResource($this->less, [
                 [
@@ -303,62 +320,67 @@ class Theme
     private function collectTemplates()
     {
         $parts = explode('\\', str_replace('\\app\controllers\\', '', strtolower(router()->getControllerClass())));
-//        $parts[] = router()->getActionName();
-        $paths = $used = [];
+        array_unshift($parts, 'index');
+        $paths = $used = $head = $foot = [];
         $sort = -1;
-        foreach($parts as $part)
+        foreach($parts as $index => $part)
         {
             $paths[] = 'frontend'.DS.(isset($used[0]) ? implode(DS, $used).DS : '').$part.DS;
-            $used[] = $part;
+            if(0 !== $index)
+            {
+                $used[] = $part;
+            }
         }
-        echo '----------------------------------------<br><pre>';
-        print_r('controllerName -> '.router()->getControllerClass().'<br>');
-        print_r('actionName -> '.router()->getActionName().'<br>');
-        print_r($parts);
-        print_r($paths);
-        echo '<pre>----------------------------------------<br>';
         foreach(array_reverse($paths) as $path)
         {
-            if($check = $this->getPaths($path.'head.phtml', \false, \true))
+            $this->resolveTemplateResults($this->getPaths($path.'head.phtml', \true), $head);
+            if(!$this->resolveTemplateResults($this->getPaths($path.router()->getActionName().'.phtml', \false)))
             {
-                if(isset($check[0]))
-                {
-                    foreach($check as $template)
-                    {
-                        $this->templates[] = $template['file'];
-                    }
-                } else {
-                    $this->templates[] = $check['file'];
-                }
-
+                $this->resolveTemplateResults($this->getPaths($path.'index.phtml', \false));
             }
-            if($check = $this->getPaths($path.router()->getActionName().'.phtml', \false, \true))
-            {
-                if(isset($check[0]))
-                {
-                    foreach($check as $template)
-                    {
-                        $this->templates[] = $template['file'];
-                    }
-                } else {
-                    $this->templates[] = $check['file'];
-                }
-            }
-            if($check = $this->getPaths($path.'foot.phtml', \false, \true))
-            {
-                if(isset($check[0]))
-                {
-                    foreach($check as $template)
-                    {
-                        $this->templates[] = $template['file'];
-                    }
-                } else {
-                    $this->templates[] = $check['file'];
-                }
-            }
+            $this->resolveTemplateResults($this->getPaths($path.'foot.phtml', \true), $foot);
             $sort++;
         }
+        $this->templates = [array_shift($this->templates)];
+        $head = [array_shift($head)];
+        $foot = [array_shift($foot)];
+        $this->templates = array_merge($head, $this->templates, $foot);
+        if(config()['debug']['theme']['template'])
+        {
+            echo '------------------------------------------------- $this->templates<br><pre>';
+            print_r($this->templates);
+            echo '-------------------------------------------------<pre><br>';
+        }
         $this->output();
+    }
+
+    /**
+     * @param $check
+     * @param bool|array $targetArray
+     * @return bool|void
+     */
+    private function resolveTemplateResults($check, &$targetArray = \false)
+    {
+        if(\false === $check)
+        {
+            return \false;
+        }
+        $result = [];
+        if(isset($check[0]))
+        {
+            foreach($check as $template)
+            {
+                $result[] = $template['file'];
+            }
+        } else {
+            $result[] = $check['file'];
+        }
+        if(is_array($targetArray))
+        {
+            $targetArray = array_merge($targetArray, $result);
+        } else {
+            $this->templates = array_merge($this->templates, $result);
+        }
     }
 
     /**
@@ -373,7 +395,7 @@ class Theme
         {
             $set = [$set];
         }
-        if(!empty($set) && array_key_exists($type, array_flip(['js','less'])))
+        if(!empty($set) && ('js' === $type || 'less' === $type))
         {
             foreach($set as $data)
             {
@@ -386,7 +408,7 @@ class Theme
                 }
                 if($source === 'internal')
                 {
-                    if($files = $this->getPaths('assets'.DS.$type.DS.$data['file'], (isset($data['override']) ? $data['override'] : \false)))
+                    if($files = $this->getPaths('assets'.DS.$type.DS.$data['file'], (isset($data['override']) ? $data['override'] : \false), true))
                     {
                         $array[] = [
                             'files' => $files,
@@ -406,14 +428,21 @@ class Theme
     /**
      * @param $path
      * @param bool $override
-     * @param bool $debug
+     * @param bool $resource
      * @return bool|array
      */
-    private function getPaths($path, $override = \false, $debug = \false)
+    private function getPaths($path, $override = \false, $resource = \false)
     {
+        $debug = (config()['debug']['theme']['template'] && \false === $resource) || (config()['debug']['theme']['resource'] && \true === $resource);
         $return = [];
         if($debug)
         {
+            echo '<br><pre>Theme::getPaths($path, $override = \false)<br>------------------------------------------------- $path<br>';
+            var_dump($path);
+            echo '------------------------------------------------- $override<br>';
+            echo '';
+            var_dump($override);
+            echo '';
             echo TP.config()['theme'].DS.$path.'<br>';
         }
         if(stream_resolve_include_path(TP.config()['theme'].DS.$path))
@@ -440,6 +469,10 @@ class Theme
                 }
             }
         }
+        if($debug)
+        {
+            echo '</pre><br>';
+        }
         if($return === [])
         {
             return \false;
@@ -463,7 +496,7 @@ class Theme
         ob_start();
         include($file);
         $output .= ob_get_clean();
-        if(config()['debug'])
+        if(config()['debug']['pathInfo'])
         {
             $output = '<div class="path-info-div"><small class="path-info-small" title="'.$file.'">FILE: '.$file.'</small>'.$output.'</div>';
         }
@@ -514,6 +547,9 @@ class Theme
   -->
 
 COPYRIGHT;
-        echo $copyright.$this->minifyOutput($output);
+        $output = $copyright.$this->minifyOutput($output);
+        utilities()->mkd(str_replace('/'.basename($this->minThemeFile), '', $this->minThemeFile), 0777);
+        file_put_contents($this->minThemeFile, $output);
+        echo $output;
     }
 }
