@@ -152,7 +152,6 @@ class Router
     private function processUri()
     {
         $path = [];
-        logger()->log('test');
         if(isset($_REQUEST['path']))
         {
             $path = explode('/', $_REQUEST['path']);
