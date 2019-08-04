@@ -64,6 +64,10 @@ function config()
         {
             unset($config['db']);
         }
+        if(isset($config['registeredWidgets']))
+        {
+            $config['registeredWidgets'] = array_flip($config['registeredWidgets']);
+        }
         if($config['showErrors'])
         {
             error_reporting(E_ALL);
@@ -172,6 +176,6 @@ function __($str, $return = \false)
 logger();
 config();
 db();
-router();
+router()->initController();
 plugin($composer);
 theme()->loadResources();

@@ -6,10 +6,12 @@
 return [
     'registeredControllers' => [
         '404',
+        'widgets',
         'lvl1' => [
             'lvl2'
         ]
     ],
+    'registeredWidgets' => [],
     'debug' => [
         'theme' => [
             'template' => \false,
@@ -28,12 +30,8 @@ return [
     'js' => [
         'internal' => [
             [
-                'file' => 'index.js',
+                'file' => 'widgets.js',
                 'sort' => 0
-            ],[
-                'file' => 'test.js',
-                'sort' => -3,
-                'override' => \false
             ]
         ],
         'external' => []
@@ -52,5 +50,6 @@ return [
         'js' => \false,
         'html' => \false
     ],
-    'databaseLock' => \true
+    'databaseLock' => \true,
+    'vue' => \true
 ];

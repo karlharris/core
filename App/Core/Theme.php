@@ -77,7 +77,22 @@ class Theme
     /**
      * @var array
      */
+    private $paths = [];
+
+    /**
+     * @var array
+     */
     private $templates = [];
+
+    /**
+     * @var string
+     */
+    private $themeHash = '';
+
+    /**
+     * @var int
+     */
+    private $widgetsCount = 0;
 
     /**
      * Theme constructor.
@@ -90,6 +105,17 @@ class Theme
             $this->noRender = \true;
         }
         $this->theme = config()['theme'];
+        $resourcePath = strtolower(str_replace(['App\Controllers\\', '\\'], ['', '/'], router()->getControllerClass()).DS.router()->getActionName());
+        /** prevent resource processing, when a file is called that not exists */
+        if(\false !== strpos($resourcePath, 'app/controller'))
+        {
+            router()->redirect('404', '404');
+        }
+        $this->minCssFile = CP.'css'.$resourcePath.'.css';
+        $this->minJsFile = CP.'js'.$resourcePath.'.js';
+        $minThemeFile = CP.'html'.$resourcePath.'.csf';
+        $this->themeHash = md5($minThemeFile);
+        $this->minThemeFile = str_replace(basename($minThemeFile),$this->themeHash.'.csf',$minThemeFile);
     }
 
     /**
@@ -193,16 +219,11 @@ class Theme
     }
 
     /**
-     * is triggered before loading resources
-     * @return bool
+     * @return array
      */
-    private function preDispatch()
+    public function getPathArray()
     {
-        if(method_exists(router()->getController(), 'preDispatchTheme'))
-        {
-            return router()->getController()->preDispatchTheme();
-        }
-        return \true;
+        return $this->paths;
     }
 
     /**
@@ -210,23 +231,14 @@ class Theme
      */
     public function loadResources()
     {
-        if($this->noRender || !$this->preDispatch())
+        if($this->noRender)
         {
             return;
         }
-        $resourcePath = strtolower(str_replace(['App\Controllers\\', '\\'], ['', '/'], router()->getControllerClass()).DS.router()->getActionName());
-        /** prevent resource processing, when a file is called that not exists */
-        if(\false !== strpos($resourcePath, 'app/controller'))
-        {
-            router()->redirect('404', '404');
-        }
-        $minThemeFile = CP.'html'.$resourcePath.'.csf';
-        $hash = md5($minThemeFile);
-        $this->minThemeFile = str_replace(basename($minThemeFile),$hash.'.csf',$minThemeFile);
         if(config()['cache']['html'] && stream_resolve_include_path($this->minThemeFile))
         {
             echo file_get_contents($this->minThemeFile);
-            $cacheId = $hash;
+            $cacheId = $this->themeHash;
             echo <<<CACHEID
 
 <!--
@@ -235,8 +247,17 @@ class Theme
 CACHEID;
             exit;
         }
-        $this->minCssFile = CP.'css'.$resourcePath.'.css';
-        $this->minJsFile = CP.'js'.$resourcePath.'.js';
+        $parts = explode('\\', str_replace('\\app\controllers\\', '', strtolower(router()->getControllerClass())));
+        array_unshift($parts, 'index');
+        $used = [];
+        foreach($parts as $index => $part)
+        {
+            $this->paths[] = DS.(isset($used[0]) ? implode(DS, $used).DS : '').$part.DS;
+            if(0 !== $index)
+            {
+                $used[] = $part;
+            }
+        }
         if(config()['debug']['pathInfo'])
         {
             $this->setResource($this->less, [
@@ -264,7 +285,7 @@ CACHEID;
     {
         $this->setResource($this->js, config()['js']['internal'], 'js');
         $this->setResource($this->js, config()['js']['external'], 'js', self::RESOURCE_TYPE_EXTERNAL);
-        if(isset($this->js[0])) /** faster than count($this->js) > 0 or empty($this->js) */
+        if(isset($this->js[0]))
         {
             utilities()->sortArrayByValue($this->js);
             try
@@ -319,24 +340,15 @@ CACHEID;
      */
     private function collectTemplates()
     {
-        $parts = explode('\\', str_replace('\\app\controllers\\', '', strtolower(router()->getControllerClass())));
-        array_unshift($parts, 'index');
-        $paths = $used = $head = $foot = [];
+        $head = $foot = [];
         $sort = -1;
-        foreach($parts as $index => $part)
+        foreach(array_reverse($this->paths) as $path)
         {
-            $paths[] = 'frontend'.DS.(isset($used[0]) ? implode(DS, $used).DS : '').$part.DS;
-            if(0 !== $index)
-            {
-                $used[] = $part;
-            }
-        }
-        foreach(array_reverse($paths) as $path)
-        {
+            $path = 'frontend'.$path;
             $this->resolveTemplateResults($this->getPaths($path.'head.phtml', \true), $head);
-            if(!$this->resolveTemplateResults($this->getPaths($path.router()->getActionName().'.phtml', \false)))
+            if(!$this->resolveTemplateResults($this->getPaths($path.router()->getActionName().'.phtml', \false), $this->templates))
             {
-                $this->resolveTemplateResults($this->getPaths($path.'index.phtml', \false));
+                $this->resolveTemplateResults($this->getPaths($path.'index.phtml', \false), $this->templates);
             }
             $this->resolveTemplateResults($this->getPaths($path.'foot.phtml', \true), $foot);
             $sort++;
@@ -347,7 +359,7 @@ CACHEID;
         $this->templates = array_merge($head, $this->templates, $foot);
         if(config()['debug']['theme']['template'])
         {
-            echo '------------------------------------------------- $this->templates<br><pre>';
+            echo '------------------------------------------------- Theme::collectTemplates() -> $this->templates<br><pre>';
             print_r($this->templates);
             echo '-------------------------------------------------<pre><br>';
         }
@@ -359,7 +371,7 @@ CACHEID;
      * @param bool|array $targetArray
      * @return bool|void
      */
-    private function resolveTemplateResults($check, &$targetArray = \false)
+    public function resolveTemplateResults($check, &$targetArray)
     {
         if(\false === $check)
         {
@@ -375,12 +387,7 @@ CACHEID;
         } else {
             $result[] = $check['file'];
         }
-        if(is_array($targetArray))
-        {
-            $targetArray = array_merge($targetArray, $result);
-        } else {
-            $this->templates = array_merge($this->templates, $result);
-        }
+        $targetArray = array_merge($targetArray, $result);
     }
 
     /**
@@ -411,13 +418,16 @@ CACHEID;
                     if($files = $this->getPaths('assets'.DS.$type.DS.$data['file'], (isset($data['override']) ? $data['override'] : \false), true))
                     {
                         $array[] = [
-                            'files' => $files,
+                            'files' => (isset($files[0]) ? $files : [$files]),
                             'sort' => $data['sort']
                         ];
                     }
                 } else {
                     $array[] = [
-                        'file' => $data['file'],
+                        'files' => [[
+                            'file' => $data['file'],
+                            'sort' => $data['sort']
+                        ]],
                         'sort' => $data['sort']
                     ];
                 }
@@ -431,7 +441,7 @@ CACHEID;
      * @param bool $resource
      * @return bool|array
      */
-    private function getPaths($path, $override = \false, $resource = \false)
+    public function getPaths($path, $override = \false, $resource = \false)
     {
         $debug = (config()['debug']['theme']['template'] && \false === $resource) || (config()['debug']['theme']['resource'] && \true === $resource);
         $return = [];
@@ -486,11 +496,24 @@ CACHEID;
     }
 
     /**
+     * @param $name
+     */
+    public function widget($name)
+    {
+        if(!isset(config()['registeredWidgets'][$name]))
+        {
+            return;
+        }
+        echo '<div id="widget-'.$this->widgetsCount.'" class="widget-'.$name.'" data-widget="'.$name.'" v-html="message"></div>';
+        $this->widgetsCount++;
+    }
+
+    /**
      * @param $file
      * @param bool $echo
      * @return bool|string
      */
-    private function renderPhtml($file, $echo = \false)
+    public function renderPhtml($file, $echo = \false)
     {
         $output = '';
         ob_start();

@@ -45,14 +45,6 @@ class Router
     {
         $this->registeredControllers = config()['registeredControllers'];
         $this->processUri();
-        if(!empty($this->uriParams['path']) && !$this->isValidPath($this->uriParams['path']))
-        {
-            $this->redirect('404', '404');
-        }
-        if(class_exists($this->controllerClass))
-        {
-            $this->controller = new $this->controllerClass();
-        }
     }
 
     /**
@@ -140,11 +132,27 @@ class Router
     }
 
     /**
+     * initialize controller class if exists
+     */
+    public function initController()
+    {
+        if(class_exists($this->controllerClass))
+        {
+            $this->controller = new $this->controllerClass();
+        }
+        if(!empty($this->uriParams['path']) && !$this->isValidPath($this->uriParams['path']))
+        {
+            $this->redirect('404', '404');
+        }
+    }
+
+    /**
      * set uri params
      */
     private function processUri()
     {
         $path = [];
+        logger()->log('test');
         if(isset($_REQUEST['path']))
         {
             $path = explode('/', $_REQUEST['path']);
