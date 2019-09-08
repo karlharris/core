@@ -27,11 +27,22 @@ if(typeof Vue === 'function')
                         new Vue({
                             el: '#'+valueLvl2.id,
                             data: {
-                                message: ''
+                                message: '',
+                                widget: valueLvl1
                             },
                             created: function()
                             {
                                 this.message = response;
+                            },
+                            methods: {
+                                refresh: function()
+                                {
+                                    fetch('/widgets/?load='+this.widget).then(response => {
+                                        return response.text();
+                                    }).then(response => {
+                                        this.message = response;
+                                    });
+                                }
                             }
                         });
                     }

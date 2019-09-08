@@ -5,6 +5,10 @@
 
 namespace App\Controllers;
 
+use function router;
+use function config;
+use function theme;
+
 /**
  * Class Widgets
  * @package App\Controllers
@@ -27,7 +31,7 @@ class Widgets
             router()->redirect('404','404');
         }
         theme()->setNoRender(true);
-        $widgetClass = '\App\Widgets\\'.ucfirst($widgetName);
+        $widgetClass = '\Widgets\\'.ucfirst($widgetName);
         if(class_exists($widgetClass))
         {
             $widgetClass = new $widgetClass();

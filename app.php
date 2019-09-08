@@ -16,10 +16,3 @@ if(!require_once('App/Autoloader.php'))
 {
     die('Autoloader.php not found.');
 }
-if(!config()['databaseLock'])
-{
-    echo '<h2>Warning</h2>';
-    echo 'karlharris/core have to be installed to use database storage - run "php App/Cli.php core:db:install".<br>Or, if you just want to use templates and stuff set "databaseLock" to true, to suppress this warning.';
-    echo '<h2>Warnung</h2>';
-    echo 'karlharris/core muss installiert sein um Datenbank-Funktionalitäten zu nutzen - führen Sie "php App/Cli.php core:db:install" aus.<br>Oder, wenn Sie nur templates etc. nutzen möchten, setzen Sie "databaseLock" auf true, um diese Warnung zu umgehen.';
-}

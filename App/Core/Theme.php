@@ -299,7 +299,7 @@ CACHEID;
                         $minifiedJs .= \JShrink\Minifier::minify(file_get_contents($file['file']));
                     }
                 }
-                utilities()->mkd(str_replace('/'.basename($this->minJsFile), '', $this->minJsFile), 0777);
+                utilities()->mkd(str_replace('/'.basename($this->minJsFile), '', $this->minJsFile), 0755);
                 file_put_contents($this->minJsFile, $minifiedJs);
             } catch(Exception $e) {
                 logger()->log('failed to minify js files -> '.$e->getMessage());
@@ -327,7 +327,7 @@ CACHEID;
                         $parser->parseFile($file['file'], str_replace(basename($file['file']), '', $file['file']));
                     }
                 }
-                utilities()->mkd(str_replace('/'.basename($this->minCssFile), '', $this->minCssFile), 0777);
+                utilities()->mkd(str_replace('/'.basename($this->minCssFile), '', $this->minCssFile), 0755);
                 file_put_contents($this->minCssFile, $parser->getCss());
             } catch(Exception $e) {
                 logger()->log('failed to parse less files -> '.$e->getMessage());
@@ -571,7 +571,7 @@ CACHEID;
 
 COPYRIGHT;
         $output = $copyright.$this->minifyOutput($output);
-        utilities()->mkd(str_replace('/'.basename($this->minThemeFile), '', $this->minThemeFile), 0777);
+        utilities()->mkd(str_replace('/'.basename($this->minThemeFile), '', $this->minThemeFile), 0755);
         file_put_contents($this->minThemeFile, $output);
         echo $output;
     }

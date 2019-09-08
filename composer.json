@@ -18,7 +18,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "App/",
-            "Plugins\\": "Plugins/"
+            "Plugins\\": "Plugins/",
+            "Widgets\\": "Widgets/"
         }
     },
     "config": {

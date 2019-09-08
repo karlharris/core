@@ -7,6 +7,7 @@ namespace App\Core;
 
 use Exception;
 
+use InvalidArgumentException;
 use function logger;
 
 /**

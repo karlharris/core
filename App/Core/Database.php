@@ -6,6 +6,7 @@
 namespace App\Core;
 
 use PDO;
+use PDOException;
 use function logger;
 
 /**
@@ -37,7 +38,7 @@ class Database
     }
 
     /**
-     * @return bool|\PDO
+     * @return bool|PDO
      */
     private function createConnection()
     {
@@ -49,7 +50,7 @@ class Database
                 $this->dbConfig['pass']
             );
             return ($connection instanceof PDO ? $connection : \false);
-        } catch(\PDOException $e)
+        } catch(PDOException $e)
         {
             logger()->log('Could not establish database connection -> '.$e->getMessage());
             return \false;
@@ -57,7 +58,7 @@ class Database
     }
 
     /**
-     * @return bool|\PDO
+     * @return bool|PDO
      */
     public function getDb()
     {

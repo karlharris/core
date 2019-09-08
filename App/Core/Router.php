@@ -189,18 +189,16 @@ class Router
     {
         if($httpStatus === '301')
         {
-            header("HTTP/1.1 301 Moved Permanently");
+            header("HTTP/1.1 301 Moved Permanently", \true, 301);
         }
         if($httpStatus === '404')
         {
             header("HTTP/1.0 404 Not Found", \true, 404);
         }
-
         if(is_string($params))
         {
             $params = [$params];
         }
-
         $path = '/';
         if(isset($params[0]))
         {

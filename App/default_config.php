@@ -50,6 +50,6 @@ return [
         'js' => \false,
         'html' => \false
     ],
-    'databaseLock' => \true,
+    'databaseLock' => \false,
     'vue' => \true
 ];
